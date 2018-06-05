@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/enemy">
+        <file>res/Gaben_Reimu.png</file>
+    </qresource>
+    <qresource prefix="/bullets">
+        <file>res/steam_logo.png</file>
+        <file>res/50%.png</file>
+        <file>res/66%.png</file>
+        <file>res/75%.png</file>
+        <file>res/90%.png</file>
+    </qresource>
+    <qresource prefix="/player">
+        <file>res/Savings.png</file>
+    </qresource>
+</RCC>
