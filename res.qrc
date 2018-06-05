@@ -11,5 +11,6 @@
     </qresource>
     <qresource prefix="/player">
         <file>res/Savings.png</file>
+        <file>res/heart.png</file>
     </qresource>
 </RCC>

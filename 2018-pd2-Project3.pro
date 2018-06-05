@@ -26,11 +26,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    character.cpp
+    character.cpp \
+    bullet.cpp
 
 HEADERS += \
         mainwindow.h \
-    character.h
+    character.h \
+    bullet.h
 
 FORMS += \
         mainwindow.ui
