@@ -1,23 +1,45 @@
 #include "bullet.h"
 
-bullet::bullet(const QString &filename = nullptr, int x = -1, int y = -1, int vx = 0, int vy = 0):
-    QGraphicsPixmapItem(QPixmap(filename).scaled(15, 15)),
+bullet::bullet(const QString &filename, int x, int y, int vx, int vy, int size):
+    QGraphicsPixmapItem(QPixmap(filename).scaled(size, size)),
     vx(vx),
     vy(vy)
 {
     this->setPos(x, y);
-    borderOfScene = new QRectF(-100, -100, 1122, 866);
 }
 
-bullet::~bullet(){}
+bullet::bullet(const bullet &old):
+    QGraphicsPixmapItem(old.pixmap()),
+    vx(old.vx),
+    vy(old.vy)
+{
+    this->setPos(old.x(), old.y());
+}
 
-void bullet::fly(){
-    qDebug() << "I beleve I can fly~";
+bullet::~bullet(){
+    qDebug() << "dtor";
+}
+
+bullet& bullet::operator =(const bullet& r){
+    this->setPixmap(r.pixmap());
+    this->setPos(r.x(), r.y());
+    vx = r.vx;
+    vy = r.vy;
+}
+
+bool bullet::fly(const QGraphicsPixmapItem *enemy){
     this->setPos(this->x() + vx, this->y() - vy);
-    if(!borderOfScene->contains(this->x(), this->y())){
+    if(this->collidesWithItem(enemy)){
         this->scene()->removeItem(this);
         delete this;
+        return true;
     }
+    if(!borderOfScene.contains(this->x(), this->y())){
+        this->scene()->removeItem(this);
+        delete this;
+        return false;
+    }
+    return false;
 }
 
 void bullet::tracefly(){

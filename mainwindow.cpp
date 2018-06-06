@@ -3,6 +3,7 @@
 
 #include <QDebug>
 
+QRectF borderOfScene = QRectF(-100, -100, 1122, 866);
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -151,17 +152,24 @@ bool MainWindow::collidingDetect(){
 }
 
 void MainWindow::respawn(){
+    disconnect(this->timer, SIGNAL(timeout()), this, SLOT(moveHandler()));
+    disconnect(this->timer, SIGNAL(timeout()), this, SLOT(attackHandler()));
     if(respawnTime->elapsed() >= 3000){
         player = new wallet;
         scene->addItem(player);
         player->setPos((scene->width() - player->boundingRect().width()) / 2, 766 - player->boundingRect().height());
         disconnect(this->timer, SIGNAL(timeout()), this, SLOT(respawn()));
+        connect(this->timer, SIGNAL(timeout()), this, SLOT(moveHandler()));
+        connect(this->timer, SIGNAL(timeout()), this, SLOT(attackHandler()));
     }
 }
 
 void MainWindow::attackHandler(){
-    if(attack && attackTime->elapsed() >= 100){
-        player->attack(timer);
+    if(attack && attackTime->elapsed() >= 40){ // player attacks
+        if(player == NULL){
+            return;
+        }
+        player->attack(timer, boss);
         attackTime->start();
     }
 }

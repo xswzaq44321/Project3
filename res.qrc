@@ -8,6 +8,11 @@
         <file>res/66%.png</file>
         <file>res/75%.png</file>
         <file>res/90%.png</file>
+        <file>res/USD/1_cent.png</file>
+        <file>res/USD/5_cent.png</file>
+        <file>res/USD/10_cent.png</file>
+        <file>res/USD/25_cent.png</file>
+        <file>res/USD/50_cent.png</file>
     </qresource>
     <qresource prefix="/player">
         <file>res/Savings.png</file>

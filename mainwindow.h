@@ -10,6 +10,8 @@
 #include <QTime>
 #include <QKeyEvent>
 #include <set>
+#include <QRectF>
+#include <QList>
 #include "character.h"
 #include "bullet.h"
 using std::set;
@@ -17,6 +19,8 @@ using std::set;
 namespace Ui {
 class MainWindow;
 }
+
+extern QRectF borderOfScene;
 
 class MainWindow : public QMainWindow
 {
