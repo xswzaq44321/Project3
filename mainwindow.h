@@ -11,6 +11,7 @@
 #include <QKeyEvent>
 #include <set>
 #include "character.h"
+#include "bullet.h"
 using std::set;
 
 namespace Ui {
@@ -32,18 +33,21 @@ private slots:
     void moveHandler();
     bool collidingDetect();
     void respawn();
+    void attackHandler();
 
 private:
     Ui::MainWindow *ui;
     QGraphicsScene *scene;
     QGraphicsPixmapItem *item;
     QTimer *timer;
-    QTime *myTime;
+    QTime *respawnTime;
+    QTime *attackTime;
     character *boss, *player;
     bool moving[4] = {0};
     int speed = 2;
+    bool attack = false;
     set<int> moveKeys;
-    set<int> functionKeys; // function keys
+    set<int> functionKeys;
 };
 
 #endif // MAINWINDOW_H

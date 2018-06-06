@@ -35,7 +35,7 @@ gaben_reimu::gaben_reimu():
 gaben_reimu::~gaben_reimu(){
 }
 
-void gaben_reimu::attack(){
+void gaben_reimu::attack(QTimer *timer){
 }
 
 void gaben_reimu::hit(){
@@ -54,7 +54,11 @@ wallet::wallet():
 wallet::~wallet(){
 }
 
-void wallet::attack(){
+void wallet::attack(QTimer *timer){
+    qDebug() << "attack!";
+    bullet *b = new bullet(":/bullets/res/steam_logo.png", this->x() + this->boundingRect().width() / 2, this->y(), 0, 1);
+    this->scene()->addItem(b);
+    connect(timer, SIGNAL(timeout()), b, SLOT(fly()));
 }
 
 void wallet::hit(){

@@ -8,14 +8,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     scene(new QGraphicsScene(0, 0, 1022, 766, this)),
     timer(new QTimer),
-    myTime(new QTime)
+    respawnTime(new QTime),
+    attackTime(new QTime)
 {
     ui->setupUi(this);
     this->setFixedSize(1024, 768);
     ui->graphicsView->setScene(scene);
     ui->graphicsView->installEventFilter(this);
     timer->start(10);
-    myTime->start();
+    respawnTime->start();
+    attackTime->start();
     moveKeys.insert(Qt::Key_Up);
     moveKeys.insert(Qt::Key_Down);
     moveKeys.insert(Qt::Key_Left);
@@ -25,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     functionKeys.insert(Qt::Key_Shift);
     connect(this->timer, SIGNAL(timeout()), this, SLOT(moveHandler()));
     connect(this->timer, SIGNAL(timeout()), this, SLOT(collidingDetect()));
+    connect(this->timer, SIGNAL(timeout()), this, SLOT(attackHandler()));
 
     boss = new gaben_reimu;
     scene->addItem(boss);
@@ -74,6 +77,9 @@ void MainWindow::keyPressEvent(QKeyEvent *e){
         case Qt::Key_Shift:
             speed = 1;
             break;
+        case Qt::Key_Z:
+            attack = true;
+            break;
         }
     }
 }
@@ -98,6 +104,11 @@ void MainWindow::keyReleaseEvent(QKeyEvent *e){
         switch(e->key()){
         case Qt::Key_Shift:
             speed = 2;
+            break;
+        case Qt::Key_Z:
+            attack = false;
+            break;
+        case Qt::Key_X:
             break;
         }
     }
@@ -128,10 +139,11 @@ bool MainWindow::collidingDetect(){
     }
     if(player->collidesWithItem(boss)){
         qDebug() << "collide with boss";
+        qDebug() << "respawn in 3 sec...";
         scene->removeItem(player);
         delete player;
         player = NULL;
-        myTime->restart();
+        respawnTime->restart();
         connect(this->timer, SIGNAL(timeout()), this, SLOT(respawn()));
         return true;
     }
@@ -139,10 +151,17 @@ bool MainWindow::collidingDetect(){
 }
 
 void MainWindow::respawn(){
-    if(myTime->elapsed() >= 3000){
+    if(respawnTime->elapsed() >= 3000){
         player = new wallet;
         scene->addItem(player);
         player->setPos((scene->width() - player->boundingRect().width()) / 2, 766 - player->boundingRect().height());
         disconnect(this->timer, SIGNAL(timeout()), this, SLOT(respawn()));
+    }
+}
+
+void MainWindow::attackHandler(){
+    if(attack && attackTime->elapsed() >= 100){
+        player->attack(timer);
+        attackTime->start();
     }
 }
