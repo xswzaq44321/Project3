@@ -40,7 +40,7 @@ gaben_reimu::gaben_reimu():
 gaben_reimu::~gaben_reimu(){
 }
 
-void gaben_reimu::attack(QTimer *timer, character *enemy){
+void gaben_reimu::attack(QTimer *timer){
 }
 
 void gaben_reimu::hit(){
@@ -55,23 +55,17 @@ void gaben_reimu::hit(){
 wallet::wallet():
     character(":/player/res/Savings.png", 1000)
 {
-    normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/USD/50_cent.png", 0, 0, 0, 10, 30));
-    normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/USD/50_cent.png", 0, 0, 1, 10, 30));
-    normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/USD/50_cent.png", 0, 0, -1, 10, 30));
+    normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/USD/50_cent.png", 0, 0, 0, 10, 30, this));
+    normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/USD/50_cent.png", 0, 0, 1, 10, 30, this));
+    normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/USD/50_cent.png", 0, 0, -1, 10, 30, this));
 }
 
-void wallet::attack(QTimer *timer, character *enemy){
-    for(QVector<bullet>::iterator it = normalBullets.begin(); it != normalBullets.end(); ++it){
+void wallet::attack(QTimer *timer){
+    for(QList<bullet>::iterator it = normalBullets.begin(); it != normalBullets.end(); ++it){
         bullet *b = new bullet(static_cast<bullet>(*it));
         b->setPos(this->x() + this->boundingRect().width() / 2 - b->boundingRect().width() / 2, this->y());
         this->scene()->addItem(b);
-        connect(timer, &QTimer::timeout, b, [this, b, enemy]{
-            bool hit = b->fly(enemy);
-            if(hit){
-                enemy->hit();
-                qDebug() << "hit";
-            }
-        });
+        connect(timer, &QTimer::timeout, b, &bullet::fly);
     }
 }
 

@@ -3,8 +3,10 @@
 
 #include <QDebug>
 
-QRectF borderOfBullet = QRectF(-100, -100, 1122, 866);
-QRectF borderOfCharacter = QRectF(0, 0, 1022, 766);
+QRectF borderOfBullet = QRectF(-100, -100, 722, 866);
+QRectF borderOfCharacter = QRectF(0, 0, 622, 766);
+QList<QGraphicsItem*> *enemyList;
+QList<QGraphicsItem*> *myBullitList;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -31,12 +33,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this->timer, SIGNAL(timeout()), this, SLOT(collidingDetect()));
     connect(this->timer, SIGNAL(timeout()), this, SLOT(attackHandler()));
 
+    enemyList = new QList<QGraphicsItem*>();
+    myBullitList = new QList<QGraphicsItem*>();
     boss = new gaben_reimu;
     scene->addItem(boss);
     player = new wallet;
     scene->addItem(player);
-    boss->setPos((scene->width() - boss->boundingRect().width()) / 2, 0);
-    player->setPos((scene->width() - player->boundingRect().width()) / 2, 766 - player->boundingRect().height());
+    boss->setPos((borderOfCharacter.width() - boss->boundingRect().width()) / 2, 0);
+    player->setPos((borderOfCharacter.width() - player->boundingRect().width()) / 2, 766 - player->boundingRect().height());
 }
 
 MainWindow::~MainWindow()
@@ -140,18 +144,48 @@ void MainWindow::moveHandler(){
 }
 
 bool MainWindow::collidingDetect(){
-    if(boss == NULL || player == NULL){
+    if(player == NULL){
         return false;
     }
-    if(player->collidesWithItem(boss)){
-        qDebug() << "collide with boss";
-        qDebug() << "respawn in 2 sec...";
-        scene->removeItem(player);
-        delete player;
-        player = NULL;
-        respawnTime->restart();
-        connect(this->timer, SIGNAL(timeout()), this, SLOT(respawn()));
-        return true;
+    QList<QGraphicsItem*> all = scene->items();
+    enemyList->clear();
+    myBullitList->clear();
+    for(QGraphicsItem* it:all){
+        character *who;
+        bullet *b;
+        if((who = dynamic_cast<character*>(it)) != 0){
+            if(who != player){
+                enemyList->insert(enemyList->end(), it);
+            }
+            continue;
+        }
+        if((b = dynamic_cast<bullet*>(it)) != 0){
+            if(b->origin == player){
+                myBullitList->insert(myBullitList->end(), it);
+            }
+            continue;
+        }
+    }
+//    qDebug() << myBullitList->size();
+    for(QGraphicsItem* it:(*enemyList)){ // see if player hits enemy
+        if(player->collidesWithItem(it)){
+            qDebug() << "collide with boss";
+            qDebug() << "respawn in 2 sec...";
+            scene->removeItem(player);
+            delete player;
+            player = NULL;
+            respawnTime->restart();
+            connect(this->timer, SIGNAL(timeout()), this, SLOT(respawn()));
+            return true;
+        }
+    }
+    for(QGraphicsItem *it:(*myBullitList)){
+        for(QGraphicsItem *jt:(*enemyList)){
+            if(it->collidesWithItem(jt)){
+                dynamic_cast<character*>(jt)->hit();
+                delete dynamic_cast<bullet*>(it);
+            }
+        }
     }
     return false;
 }
@@ -165,7 +199,7 @@ void MainWindow::respawn(){
             scene->addItem(player);
         }
         if(respawnTime->elapsed() <= 2000){
-            player->setPos((scene->width() - player->boundingRect().width()) /  2, scene->height() - player->boundingRect().height()*((respawnTime->elapsed() - 1000.0) / 1000.0));
+            player->setPos((borderOfCharacter.width() - player->boundingRect().width()) /  2, scene->height() - player->boundingRect().height()*((respawnTime->elapsed() - 1000.0) / 1000.0));
             return;
         }
         disconnect(this->timer, SIGNAL(timeout()), this, SLOT(respawn()));
@@ -179,7 +213,7 @@ void MainWindow::attackHandler(){
         if(player == NULL){
             return;
         }
-        player->attack(timer, boss);
+        player->attack(timer);
         attackTime->start();
     }
 }

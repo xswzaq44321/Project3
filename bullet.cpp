@@ -1,9 +1,10 @@
 #include "bullet.h"
 
-bullet::bullet(const QString &filename, qreal x, qreal y, qreal vx, qreal vy, int size):
+bullet::bullet(const QString &filename, qreal x, qreal y, qreal vx, qreal vy, int size, QGraphicsItem *parent):
     QGraphicsPixmapItem(QPixmap(filename).scaled(size, size)),
     vx(vx),
-    vy(vy)
+    vy(vy),
+    origin(parent)
 {
     this->setPos(x, y);
 }
@@ -11,13 +12,14 @@ bullet::bullet(const QString &filename, qreal x, qreal y, qreal vx, qreal vy, in
 bullet::bullet(const bullet &old):
     QGraphicsPixmapItem(old.pixmap()),
     vx(old.vx),
-    vy(old.vy)
+    vy(old.vy),
+    origin(old.origin)
 {
     this->setPos(old.x(), old.y());
 }
 
 bullet::~bullet(){
-    qDebug() << "dtor";
+//    qDebug() << "dtor";
 }
 
 bullet& bullet::operator =(const bullet& r){
@@ -25,6 +27,7 @@ bullet& bullet::operator =(const bullet& r){
     this->setPos(r.x(), r.y());
     vx = r.vx;
     vy = r.vy;
+    origin = r.origin;
     return *this;
 }
 
@@ -33,19 +36,23 @@ void bullet::setVector(qreal vx, qreal vy){
     this->vy = vy;
 }
 
-bool bullet::fly(const QGraphicsPixmapItem *enemy){
+QGraphicsPixmapItem *bullet::fly(){
     this->setPos(this->x() + vx, this->y() - vy);
-    if(this->collidesWithItem(enemy)){
-        this->scene()->removeItem(this);
-        delete this;
-        return true;
-    }
+//    for(QGraphicsItem* it:(*enemyList)){
+//        QGraphicsPixmapItem *enemy2 = dynamic_cast<QGraphicsPixmapItem*>(it);
+//        if(this->collidesWithItem(enemy2)){
+////            qDebug() << "hit the enemy";
+//            this->scene()->removeItem(this);
+//            delete this;
+//            return enemy2;
+//        }
+//    }
     if(!borderOfBullet.contains(this->x(), this->y())){
         this->scene()->removeItem(this);
         delete this;
-        return false;
+        return 0;
     }
-    return false;
+    return 0;
 }
 
 void bullet::tracefly(){

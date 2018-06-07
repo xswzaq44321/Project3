@@ -22,6 +22,8 @@ class MainWindow;
 
 extern QRectF borderOfBullet;
 extern QRectF borderOfCharacter;
+extern QList<QGraphicsItem*> *enemyList;
+extern QList<QGraphicsItem*> *myBullitList;
 
 class MainWindow : public QMainWindow
 {

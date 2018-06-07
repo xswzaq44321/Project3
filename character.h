@@ -9,7 +9,6 @@
 #include <QObject>
 #include <QTimer>
 #include <QDebug>
-#include <QVector>
 #include "bullet.h"
 
 extern QRectF borderOfCharacter;
@@ -22,19 +21,19 @@ public:
     character(const QString &filename, int hp_init = 1000);
     virtual ~character();
     void move(qreal vx, qreal vy);
-    virtual void attack(QTimer *timer, character *enemy) = 0;
+    virtual void attack(QTimer *timer) = 0;
     virtual void hit() = 0;
     bool isdead();
     int hp;
     int borderX, borderY;
-    QVector<bullet> normalBullets;
+    QList<bullet> normalBullets;
 };
 
 class gaben_reimu: public character{
 public:
     gaben_reimu();
     virtual ~gaben_reimu();
-    virtual void attack(QTimer *timer, character *enemy);
+    virtual void attack(QTimer *timer);
     virtual void hit();
 };
 
@@ -42,7 +41,7 @@ class wallet: public character{
 public:
     wallet();
     virtual ~wallet();
-    virtual void attack(QTimer *timer, character *enemy);
+    virtual void attack(QTimer *timer);
     virtual void hit();
 };
 
