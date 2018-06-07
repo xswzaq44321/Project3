@@ -20,7 +20,8 @@ namespace Ui {
 class MainWindow;
 }
 
-extern QRectF borderOfScene;
+extern QRectF borderOfBullet;
+extern QRectF borderOfCharacter;
 
 class MainWindow : public QMainWindow
 {

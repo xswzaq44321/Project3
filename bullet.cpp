@@ -1,6 +1,6 @@
 #include "bullet.h"
 
-bullet::bullet(const QString &filename, int x, int y, int vx, int vy, int size):
+bullet::bullet(const QString &filename, qreal x, qreal y, qreal vx, qreal vy, int size):
     QGraphicsPixmapItem(QPixmap(filename).scaled(size, size)),
     vx(vx),
     vy(vy)
@@ -25,6 +25,12 @@ bullet& bullet::operator =(const bullet& r){
     this->setPos(r.x(), r.y());
     vx = r.vx;
     vy = r.vy;
+    return *this;
+}
+
+void bullet::setVector(qreal vx, qreal vy){
+    this->vx = vx;
+    this->vy = vy;
 }
 
 bool bullet::fly(const QGraphicsPixmapItem *enemy){
@@ -34,7 +40,7 @@ bool bullet::fly(const QGraphicsPixmapItem *enemy){
         delete this;
         return true;
     }
-    if(!borderOfScene.contains(this->x(), this->y())){
+    if(!borderOfBullet.contains(this->x(), this->y())){
         this->scene()->removeItem(this);
         delete this;
         return false;

@@ -3,7 +3,8 @@
 
 #include <QDebug>
 
-QRectF borderOfScene = QRectF(-100, -100, 1122, 866);
+QRectF borderOfBullet = QRectF(-100, -100, 1122, 866);
+QRectF borderOfCharacter = QRectF(0, 0, 1022, 766);
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -81,6 +82,8 @@ void MainWindow::keyPressEvent(QKeyEvent *e){
         case Qt::Key_Z:
             attack = true;
             break;
+        case Qt::Key_X:
+            break;
         }
     }
 }
@@ -109,28 +112,30 @@ void MainWindow::keyReleaseEvent(QKeyEvent *e){
         case Qt::Key_Z:
             attack = false;
             break;
-        case Qt::Key_X:
-            break;
         }
     }
 }
 
 void MainWindow::moveHandler(){
-    int vx = 0, vy = 0;
+    double vx = 0, vy = 0;
     if(moving[0]){
-        vy += speed;
+        vy += 1;
     }
     if(moving[1]){
-        vy -= speed;
+        vy -= 1;
     }
     if(moving[2]){
-        vx -= speed;
+        vx -= 1;
     }
     if(moving[3]){
-        vx += speed;
+        vx += 1;
     }
     if(player != NULL){
+        double r = sqrt(vx*vx + vy*vy);
+        vx = (r == 0 ? 0 : vx/r * speed);
+        vy = (r == 0 ? 0 : vy/r * speed);
         player->move(vx, vy);
+//        qDebug() << vx << vy;
     }
 }
 
@@ -140,7 +145,7 @@ bool MainWindow::collidingDetect(){
     }
     if(player->collidesWithItem(boss)){
         qDebug() << "collide with boss";
-        qDebug() << "respawn in 3 sec...";
+        qDebug() << "respawn in 2 sec...";
         scene->removeItem(player);
         delete player;
         player = NULL;
@@ -154,10 +159,15 @@ bool MainWindow::collidingDetect(){
 void MainWindow::respawn(){
     disconnect(this->timer, SIGNAL(timeout()), this, SLOT(moveHandler()));
     disconnect(this->timer, SIGNAL(timeout()), this, SLOT(attackHandler()));
-    if(respawnTime->elapsed() >= 3000){
-        player = new wallet;
-        scene->addItem(player);
-        player->setPos((scene->width() - player->boundingRect().width()) / 2, 766 - player->boundingRect().height());
+    if(respawnTime->elapsed() >= 1000){
+        if(player == NULL){
+            player = new wallet;
+            scene->addItem(player);
+        }
+        if(respawnTime->elapsed() <= 2000){
+            player->setPos((scene->width() - player->boundingRect().width()) /  2, scene->height() - player->boundingRect().height()*((respawnTime->elapsed() - 1000.0) / 1000.0));
+            return;
+        }
         disconnect(this->timer, SIGNAL(timeout()), this, SLOT(respawn()));
         connect(this->timer, SIGNAL(timeout()), this, SLOT(moveHandler()));
         connect(this->timer, SIGNAL(timeout()), this, SLOT(attackHandler()));

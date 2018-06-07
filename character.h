@@ -12,6 +12,7 @@
 #include <QVector>
 #include "bullet.h"
 
+extern QRectF borderOfCharacter;
 class character: public QObject, public QGraphicsPixmapItem
 {
     Q_OBJECT
@@ -20,7 +21,7 @@ public:
     character();
     character(const QString &filename, int hp_init = 1000);
     virtual ~character();
-    void move(int vx, int vy);
+    void move(qreal vx, qreal vy);
     virtual void attack(QTimer *timer, character *enemy) = 0;
     virtual void hit() = 0;
     bool isdead();
