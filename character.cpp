@@ -46,16 +46,23 @@ gaben_reimu::~gaben_reimu(){
 
 void gaben_reimu::attack(QTimer *timer){
     if(attackCooldown.elapsed() >= 2000){
-        for(double theta = 0; theta <= 2*M_PI; theta += 2*M_PI/50){
-            bullet *b = new bullet(normalBullets.at(0));
-            b->setZValue(10);
-            b->setPos(this->x() + this->boundingRect().width()/2 + 100 * cos(theta),
-                      this->y() + this->boundingRect().height()/2 - 100 * sin(theta));
-            b->setVectorByPolar(5, theta);
-            this->scene()->addItem(b);
-            connect(timer, &QTimer::timeout, b, &bullet::fly);
+        if(attackCooldown.elapsed() <= 3000){
+            if((attackCounter += timer->interval()) % 200){
+                return;
+            }
+            for(double theta = 0; theta <= 2*M_PI; theta += 2*M_PI/50){
+                bullet *b = new bullet(normalBullets.at(0));
+                b->setZValue(10);
+                b->setPos(this->x() + this->boundingRect().width()/2 + 100 * cos(theta),
+                          this->y() + this->boundingRect().height()/2 - 100 * sin(theta));
+                b->setVectorByPolar(5, theta + M_PI/2);
+                this->scene()->addItem(b);
+                connect(timer, &QTimer::timeout, b, &bullet::fly);
+            }
+        }else{
+            attackCooldown.start();
+            attackCounter = 0;
         }
-        attackCooldown.start();
     }
 }
 

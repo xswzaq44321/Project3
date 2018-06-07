@@ -38,6 +38,8 @@ public:
     virtual ~gaben_reimu();
     virtual void attack(QTimer *timer);
     virtual bool hit();
+private:
+    int attackCounter = 0;
 };
 
 class wallet: public character{
