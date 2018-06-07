@@ -8,6 +8,7 @@
 #include <QRectF>
 #include <QDebug>
 #include <QTimer>
+#include <QtMath>
 
 extern QRectF borderOfBullet;
 extern QList<QGraphicsItem*> *enemyList;
@@ -22,12 +23,14 @@ public:
     ~bullet();
     bullet& operator =(const bullet& r);
     void setVector(qreal vx, qreal vy);
+    void setVectorByPolar(qreal r, qreal theta);
     QGraphicsItem *origin;
 public slots:
-    QGraphicsPixmapItem* fly();
+    void fly();
     void tracefly();
 private:
-    qreal vx, vy;
+    qreal vx;
+    qreal vy;
 };
 
 #endif // BULLET_H

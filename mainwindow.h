@@ -24,6 +24,7 @@ extern QRectF borderOfBullet;
 extern QRectF borderOfCharacter;
 extern QList<QGraphicsItem*> *enemyList;
 extern QList<QGraphicsItem*> *myBullitList;
+extern QList<QGraphicsItem*> *enemyBullitList;
 
 class MainWindow : public QMainWindow
 {
@@ -35,6 +36,7 @@ public:
     bool eventFilter(QObject *watched, QEvent *event);
     virtual void keyPressEvent(QKeyEvent *e);
     virtual void keyReleaseEvent(QKeyEvent *e);
+    void playerDied();
 
 private slots:
     void moveHandler();
@@ -48,7 +50,6 @@ private:
     QGraphicsPixmapItem *item;
     QTimer *timer;
     QTime *respawnTime;
-    QTime *attackTime;
     character *boss, *player;
     bool moving[4] = {0};
     int speed = 2;

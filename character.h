@@ -8,6 +8,7 @@
 #include <QList>
 #include <QObject>
 #include <QTimer>
+#include <QTime>
 #include <QDebug>
 #include "bullet.h"
 
@@ -20,12 +21,14 @@ public:
     character();
     character(const QString &filename, int hp_init = 1000);
     virtual ~character();
-    void move(qreal vx, qreal vy);
+    virtual void move(qreal vx, qreal vy);
+    virtual void setPosition(qreal x, qreal y);
     virtual void attack(QTimer *timer) = 0;
-    virtual void hit() = 0;
+    virtual bool hit() = 0;
     bool isdead();
     int hp;
     int borderX, borderY;
+    QTime attackCooldown;
     QList<bullet> normalBullets;
 };
 
@@ -34,7 +37,7 @@ public:
     gaben_reimu();
     virtual ~gaben_reimu();
     virtual void attack(QTimer *timer);
-    virtual void hit();
+    virtual bool hit();
 };
 
 class wallet: public character{
@@ -42,7 +45,10 @@ public:
     wallet();
     virtual ~wallet();
     virtual void attack(QTimer *timer);
-    virtual void hit();
+    virtual bool hit();
+    virtual void move(qreal vx, qreal vy);
+    virtual void setPosition(qreal x, qreal y);
+    QGraphicsPixmapItem *heart;
 };
 
 #endif // CHARACTER_H

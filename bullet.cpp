@@ -36,23 +36,22 @@ void bullet::setVector(qreal vx, qreal vy){
     this->vy = vy;
 }
 
-QGraphicsPixmapItem *bullet::fly(){
+void bullet::setVectorByPolar(qreal r, qreal theta){
+    if(r == 0){
+        this->vx = 0;
+        this->vy = 0;
+        return;
+    }
+    this->vx = r * qCos(theta);
+    this->vy = r * qSin(theta);
+}
+
+void bullet::fly(){
     this->setPos(this->x() + vx, this->y() - vy);
-//    for(QGraphicsItem* it:(*enemyList)){
-//        QGraphicsPixmapItem *enemy2 = dynamic_cast<QGraphicsPixmapItem*>(it);
-//        if(this->collidesWithItem(enemy2)){
-////            qDebug() << "hit the enemy";
-//            this->scene()->removeItem(this);
-//            delete this;
-//            return enemy2;
-//        }
-//    }
     if(!borderOfBullet.contains(this->x(), this->y())){
         this->scene()->removeItem(this);
         delete this;
-        return 0;
     }
-    return 0;
 }
 
 void bullet::tracefly(){
