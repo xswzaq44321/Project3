@@ -3,20 +3,21 @@
 
 #include <QDebug>
 
-QRectF borderOfBullet = QRectF(-100, -100, 722, 866);
-QRectF borderOfCharacter = QRectF(0, 0, 622, 766);
+QRectF borderOfBullet = QRectF(-100, -100, 722, 846);
+QRectF borderOfCharacter = QRectF(0, 0, 622, 746);
 QList<QGraphicsItem*> *enemyList;
 QList<QGraphicsItem*> *myBullitList;
 QList<QGraphicsItem*> *enemyBullitList;
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(QWidget *parent):
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    scene(new QGraphicsScene(0, 0, 1022, 766, this)),
+    scene(new QGraphicsScene(borderOfCharacter)),
     timer(new QTimer),
     respawnTime(new QTime)
 {
     ui->setupUi(this);
     this->setFixedSize(1024, 768);
+    ui->graphicsView->setGeometry(-1, 21, borderOfCharacter.width() + 2, borderOfCharacter.height() + 2);
     ui->graphicsView->setScene(scene);
     ui->graphicsView->installEventFilter(this);
     timer->start(10);
@@ -170,7 +171,7 @@ bool MainWindow::collidingDetect(){
             continue;
         }
     }
-//    qDebug() << enemyBullitList->size();
+//    qDebug() << myBullitList->size();
     for(QGraphicsItem* it:((*enemyList) + (*enemyBullitList))){ // see if player hits enemy
         if(dynamic_cast<wallet*>(player)->heart->collidesWithItem(it)){
             qDebug() << "player died";
@@ -182,19 +183,19 @@ bool MainWindow::collidingDetect(){
             return true;
         }
     }
-    for(QGraphicsItem *jt:(*enemyList)){
-        for(QGraphicsItem *it:(*myBullitList)){
-            if(jt == nullptr || it == nullptr) continue;
-            if(it->collidesWithItem(jt)){
-                bool isDead = dynamic_cast<character*>(jt)->hit();
-                delete it;
-                it = nullptr;
+    for(auto it = enemyList->begin(); it != enemyList->end(); ++it){
+        for(auto jt = myBullitList->begin(); jt != myBullitList->end(); ++jt){
+            if((*it) == nullptr || (*jt) == nullptr) continue;
+            if((*it)->collidesWithItem(*jt)){
+                bool isDead = dynamic_cast<character*>(*it)->hit();
+                delete (*jt);
+                (*jt) = nullptr;
                 if(isDead){
-                    if(dynamic_cast<gaben_reimu*>(jt) != 0){ // if dead one is boss
+                    if(dynamic_cast<gaben_reimu*>(*it) != 0){ // if dead one is boss
                         boss = NULL;
                     }
-                    delete jt;
-                    jt = nullptr;
+                    delete (*it);
+                    (*it) = nullptr;
                 }
             }
         }
