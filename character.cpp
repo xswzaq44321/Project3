@@ -36,11 +36,12 @@ void character::setPosition(qreal x, qreal y){
 gaben_reimu::gaben_reimu():
     character(":/enemy/res/Gaben_Reimu.png", 1000)
 {
-    this->setZValue(2);
+    this->setZValue(20);
     normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/steam_logo.png", 0, 0, 0, 0, 15));
 }
 
 gaben_reimu::~gaben_reimu(){
+    qDebug() << "gaben dtor";
     this->scene()->removeItem(this);
 }
 
@@ -80,7 +81,7 @@ wallet::wallet():
     heart(new QGraphicsPixmapItem(QPixmap(":/player/res/heart.png").scaled(10, 10)))
 {
     this->setZValue(0);
-    this->heart->setZValue(1);
+    this->heart->setZValue(30);
     normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/USD/50_cent.png", 0, 0, 0, 10, 30, this));
     normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/USD/50_cent.png", 0, 0, 1, 10, 30, this));
     normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/USD/50_cent.png", 0, 0, -1, 10, 30, this));

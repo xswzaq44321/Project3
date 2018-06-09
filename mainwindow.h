@@ -36,7 +36,6 @@ public:
     bool eventFilter(QObject *watched, QEvent *event);
     virtual void keyPressEvent(QKeyEvent *e);
     virtual void keyReleaseEvent(QKeyEvent *e);
-    void playerDied();
 
 private slots:
     void moveHandler();

@@ -19,7 +19,7 @@ bullet::bullet(const bullet &old):
 }
 
 bullet::~bullet(){
-//    qDebug() << "dtor";
+//    qDebug() << "bullet dtor";
 }
 
 bullet& bullet::operator =(const bullet& r){

@@ -173,34 +173,33 @@ bool MainWindow::collidingDetect(){
 //    qDebug() << enemyBullitList->size();
     for(QGraphicsItem* it:((*enemyList) + (*enemyBullitList))){ // see if player hits enemy
         if(dynamic_cast<wallet*>(player)->heart->collidesWithItem(it)){
-            playerDied();
+            qDebug() << "player died";
+            qDebug() << "respawn in 2 sec...";
+            delete player;
+            player = NULL;
+            respawnTime->restart();
+            connect(this->timer, SIGNAL(timeout()), this, SLOT(respawn()));
             return true;
         }
     }
     for(QGraphicsItem *jt:(*enemyList)){
         for(QGraphicsItem *it:(*myBullitList)){
+            if(jt == nullptr || it == nullptr) continue;
             if(it->collidesWithItem(jt)){
                 bool isDead = dynamic_cast<character*>(jt)->hit();
-                delete dynamic_cast<bullet*>(it);
+                delete it;
+                it = nullptr;
                 if(isDead){
                     if(dynamic_cast<gaben_reimu*>(jt) != 0){ // if dead one is boss
                         boss = NULL;
                     }
-                    delete dynamic_cast<character*>(jt);
+                    delete jt;
+                    jt = nullptr;
                 }
             }
         }
     }
     return false;
-}
-
-void MainWindow::playerDied(){
-    qDebug() << "player died";
-    qDebug() << "respawn in 2 sec...";
-    delete player;
-    player = NULL;
-    respawnTime->restart();
-    connect(this->timer, SIGNAL(timeout()), this, SLOT(respawn()));
 }
 
 void MainWindow::respawn(){
