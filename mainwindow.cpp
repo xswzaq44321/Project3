@@ -3,6 +3,7 @@
 
 #include <QDebug>
 
+QFont mainFont("Hylia Serif Beta");
 QRectF borderOfBullet = QRectF(-100, -100, 722, 866);
 QRectF borderOfCharacter = QRectF(0, 0, 622, 766);
 QList<QGraphicsItem*> *enemyList;
@@ -43,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent):
     boss->setPosition((borderOfCharacter.width() - boss->boundingRect().width()) / 2, 0 + 40);
     player->setPosition((borderOfCharacter.width() - player->boundingRect().width()) / 2, 766 - player->boundingRect().height());
     bossHealth = scene->addRect(10, 10, borderOfCharacter.width() - 20, 10, QPen(QColor(0, 0, 0, 0)), QBrush(QColor(200, 0, 0)));
-    bossHealth->setZValue(100);
+    bossHealth->setZValue(90);
     scene->addRect(622, 0, 400, 766, QPen(QColor(0, 0, 0, 0)), QBrush(QColor(47, 63, 86)))->setZValue(100);
 }
 
@@ -148,9 +149,6 @@ void MainWindow::moveHandler(){
 }
 
 bool MainWindow::collidingDetect(){
-    if(player == NULL){
-        return false;
-    }
     QList<QGraphicsItem*> all = scene->items();
     enemyList->clear();
     myBullitList->clear();
@@ -173,16 +171,26 @@ bool MainWindow::collidingDetect(){
             continue;
         }
     }
-//    qDebug() << myBullitList->size();
-    for(QGraphicsItem* it:((*enemyList) + (*enemyBullitList))){ // see if player hits enemy
-        if(dynamic_cast<wallet*>(player)->heart->collidesWithItem(it)){
-            qDebug() << "player died";
-            qDebug() << "respawn in 2 sec...";
-            delete player;
-            player = NULL;
-            respawnTime->restart();
-            connect(this->timer, SIGNAL(timeout()), this, SLOT(respawn()));
-            return true;
+    //    qDebug() << myBullitList->size();
+    if(!playerIsDead){
+        for(QGraphicsItem* it:((*enemyList) + (*enemyBullitList))){ // see if player hits enemy
+            if(dynamic_cast<wallet*>(player)->heart->collidesWithItem(it)){
+                qDebug() << "player died";
+                qDebug() << "respawn in 2 sec...";
+                this->scene->removeItem(dynamic_cast<wallet*>(player)->heart);
+                this->scene->removeItem(player);
+                playerIsDead = true;
+                if(player->hit()){ // hit will return whether player is under 6-ft
+                    QGraphicsPixmapItem *over = new QGraphicsPixmapItem(QPixmap(":/texts/res/GameOver.png"));
+                    over->setZValue(100);
+                    over->setPos(0, 0);
+                    scene->addItem(over);
+                }else{
+                    respawnTime->restart();
+                    connect(this->timer, SIGNAL(timeout()), this, SLOT(respawn()));
+                }
+                return true;
+            }
         }
     }
     for(auto it = enemyList->begin(); it != enemyList->end(); ++it){
@@ -209,8 +217,7 @@ void MainWindow::respawn(){
     disconnect(this->timer, SIGNAL(timeout()), this, SLOT(moveHandler()));
     disconnect(this->timer, SIGNAL(timeout()), this, SLOT(attackHandler()));
     if(respawnTime->elapsed() >= 1000){
-        if(player == NULL){
-            player = new wallet;
+        if(playerIsDead){
             scene->addItem(player);
             scene->addItem(dynamic_cast<wallet*>(player)->heart);
         }
@@ -218,6 +225,7 @@ void MainWindow::respawn(){
             player->setPosition((borderOfCharacter.width() - player->boundingRect().width()) /  2, scene->height() - player->boundingRect().height()*((respawnTime->elapsed() - 1000.0) / 1000.0));
             return;
         }
+        playerIsDead = false;
         disconnect(this->timer, SIGNAL(timeout()), this, SLOT(respawn()));
         connect(this->timer, SIGNAL(timeout()), this, SLOT(moveHandler()));
         connect(this->timer, SIGNAL(timeout()), this, SLOT(attackHandler()));
@@ -225,7 +233,7 @@ void MainWindow::respawn(){
 }
 
 void MainWindow::attackHandler(){
-    if(attack && player != NULL){ // player attacks
+    if(attack && !playerIsDead){ // player attacks
         player->attack(timer);
     }
     if(boss != NULL){

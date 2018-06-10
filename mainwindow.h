@@ -12,6 +12,7 @@
 #include <set>
 #include <QRectF>
 #include <QList>
+#include <QFont>
 #include "character.h"
 #include "bullet.h"
 using std::set;
@@ -20,6 +21,7 @@ namespace Ui {
 class MainWindow;
 }
 
+extern QFont mainFont;
 extern QRectF borderOfBullet;
 extern QRectF borderOfCharacter;
 extern QList<QGraphicsItem*> *enemyList;
@@ -54,6 +56,7 @@ private:
     bool moving[4] = {0};
     int speed = 2;
     bool attack = false;
+    bool playerIsDead = false;
     set<int> moveKeys;
     set<int> functionKeys;
 };

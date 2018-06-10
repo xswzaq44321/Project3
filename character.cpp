@@ -86,9 +86,9 @@ wallet::wallet():
                            borderOfCharacter.height() - (this->boundingRect().height() + this->heart->boundingRect().height()) / 2);
     this->setZValue(0);
     this->heart->setZValue(30);
-    normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/USD/50_cent.png", 0, 0, 0, 10, 30, this));
-    normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/USD/50_cent.png", 0, 0, 1, 10, 30, this));
-    normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/USD/50_cent.png", 0, 0, -1, 10, 30, this));
+    normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/NTD/10_dollor.png", 0, 0, 0, 10, 30, this));
+    normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/NTD/10_dollor.png", 0, 0, 1, 10, 30, this));
+    normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/NTD/10_dollor.png", 0, 0, -1, 10, 30, this));
 }
 
 wallet::~wallet(){
@@ -117,4 +117,8 @@ void wallet::setPosition(qreal x, qreal y){
 bool wallet::hit(){
     --hp;
     qDebug() << "player hp = " << hp;
+    if(hp == 0){
+        return true;
+    }
+    return false;
 }

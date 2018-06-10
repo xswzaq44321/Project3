@@ -13,9 +13,17 @@
         <file>res/USD/10_cent.png</file>
         <file>res/USD/25_cent.png</file>
         <file>res/USD/50_cent.png</file>
+        <file>res/NTD/1_dollor.png</file>
+        <file>res/NTD/5_dollor.png</file>
+        <file>res/NTD/10_dollor.png</file>
+        <file>res/NTD/20_dollor.png</file>
+        <file>res/NTD/50_dollor.png</file>
     </qresource>
     <qresource prefix="/player">
         <file>res/Savings.png</file>
         <file>res/heart.png</file>
+    </qresource>
+    <qresource prefix="/texts">
+        <file>res/GameOver.png</file>
     </qresource>
 </RCC>
