@@ -1,19 +1,21 @@
 #include "bullet.h"
 
-bullet::bullet(const QString &filename, qreal x, qreal y, qreal vx, qreal vy, int size, QGraphicsItem *parent):
+bullet::bullet(const QString &filename, qreal x, qreal y, qreal r, qreal theta, int size, QGraphicsItem *parent):
     QGraphicsPixmapItem(QPixmap(filename).scaled(size, size)),
-    vx(vx),
-    vy(vy),
-    origin(parent)
+    r(r),
+    theta(theta),
+    origin(parent),
+    target(nullptr)
 {
     this->setPos(x, y);
 }
 
 bullet::bullet(const bullet &old):
     QGraphicsPixmapItem(old.pixmap()),
-    vx(old.vx),
-    vy(old.vy),
-    origin(old.origin)
+    r(old.r),
+    theta(old.theta),
+    origin(old.origin),
+    target(nullptr)
 {
     this->setPos(old.x(), old.y());
 }
@@ -22,37 +24,42 @@ bullet::~bullet(){
 //    qDebug() << "bullet dtor";
 }
 
-bullet& bullet::operator =(const bullet& r){
-    this->setPixmap(r.pixmap());
-    this->setPos(r.x(), r.y());
-    vx = r.vx;
-    vy = r.vy;
-    origin = r.origin;
+bullet& bullet::operator =(const bullet& R){
+    this->setPixmap(R.pixmap());
+    this->setPos(R.x(), R.y());
+    r = R.r;
+    theta = R.theta;
+    origin = R.origin;
+    target = R.target;
     return *this;
 }
 
-void bullet::setVector(qreal vx, qreal vy){
-    this->vx = vx;
-    this->vy = vy;
-}
-
-void bullet::setVectorByPolar(qreal r, qreal theta){
-    if(r == 0){
-        this->vx = 0;
-        this->vy = 0;
-        return;
-    }
-    this->vx = r * qCos(theta);
-    this->vy = r * qSin(theta);
+void bullet::setPolar(qreal r, qreal theta){
+    this->r = r;
+    this->theta = theta;
 }
 
 void bullet::fly(){
-    this->setPos(this->x() + vx, this->y() - vy);
+    if(!enemyList->contains(target)){
+        target = nullptr;
+    }
+    if(target != nullptr){
+        double dx =(target->x() + target->boundingRect().width() / 2) - (this->x() + this->boundingRect().width() / 2);
+        double dy =(this->y() + this->boundingRect().height() / 2) - (target->y() + target->boundingRect().height() / 2);
+        double direction = qAtan(dy / dx);
+        if(dx < 0){
+            direction += M_PI;
+        }
+        this->setPolar(r, theta + (direction - theta) / 20);
+//        qDebug() << (target->y() - this->y()) << (target->x() - this->x());
+    }
+    this->setPos(this->x() + r * qCos(theta), this->y() - r * qSin(theta));
     if(!borderOfBullet.contains(this->x(), this->y())){
         this->scene()->removeItem(this);
         delete this;
     }
 }
 
-void bullet::tracefly(){
+void bullet::setTarget(QGraphicsItem *target){
+    this->target = target;
 }

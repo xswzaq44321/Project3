@@ -13,6 +13,7 @@
 #include "bullet.h"
 
 extern QRectF borderOfCharacter;
+extern QList<QGraphicsItem*> *enemyList;
 class character: public QObject, public QGraphicsPixmapItem
 {
     Q_OBJECT
@@ -29,7 +30,7 @@ public:
     int hp, initialHp;
     QRectF border;
     QTime attackCooldown;
-    QList<bullet> normalBullets;
+    QList<bullet> normalBullets, traceBullets;
 };
 
 class gaben_reimu: public character{

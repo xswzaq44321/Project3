@@ -204,6 +204,7 @@ bool MainWindow::collidingDetect(){
                     if(dynamic_cast<gaben_reimu*>(*it) != 0){ // if dead one is boss
                         boss = NULL;
                     }
+                    enemyList->removeOne(*it);
                     delete (*it);
                     (*it) = nullptr;
                 }

@@ -56,7 +56,7 @@ void gaben_reimu::attack(QTimer *timer){
                 b->setZValue(10);
                 b->setPos(this->x() + this->boundingRect().width()/2 + 100 * cos(theta),
                           this->y() + this->boundingRect().height()/2 - 100 * sin(theta));
-                b->setVectorByPolar(5, theta + M_PI/2);
+                b->setPolar(5, theta + M_PI_2);
                 this->scene()->addItem(b);
                 connect(timer, &QTimer::timeout, b, &bullet::fly);
             }
@@ -86,9 +86,11 @@ wallet::wallet():
                            borderOfCharacter.height() - (this->boundingRect().height() + this->heart->boundingRect().height()) / 2);
     this->setZValue(0);
     this->heart->setZValue(30);
-    normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/NTD/10_dollor.png", 0, 0, 0, 10, 30, this));
-    normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/NTD/10_dollor.png", 0, 0, 1, 10, 30, this));
-    normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/NTD/10_dollor.png", 0, 0, -1, 10, 30, this));
+    normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/NTD/10_dollor.png", 0, 0, 10, M_PI_2, 30, this));
+    normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/NTD/10_dollor.png", 0, 0, 10, M_PI_2 + 0.09, 30, this));
+    normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/NTD/10_dollor.png", 0, 0, 10, M_PI_2 - 0.09, 30, this));
+    traceBullets.insert(traceBullets.end(), bullet(":/bullets/res/NTD/50_dollor.png", 0, 0, 10, M_PI_2 - 0.18, 30, this));
+    traceBullets.insert(traceBullets.end(), bullet(":/bullets/res/NTD/50_dollor.png", 0, 0, 10, M_PI_2 + 0.18, 30, this));
 }
 
 wallet::~wallet(){
@@ -102,6 +104,19 @@ void wallet::attack(QTimer *timer){
             bullet *b = new bullet(static_cast<bullet>(*it));
             b->setPos(this->x() + this->boundingRect().width() / 2 - b->boundingRect().width() / 2, this->y());
             this->scene()->addItem(b);
+            connect(timer, &QTimer::timeout, b, &bullet::fly);
+        }
+        for(int i = 0; i < 2; ++i){
+            bullet *b = new bullet(traceBullets[i]);
+            if(i){
+                b->setPos(this->x() - 10 - b->boundingRect().width(), this->y() + (this->boundingRect().height() - b->boundingRect().height()) / 2);
+            }else{
+                b->setPos(this->x() + this->boundingRect().width() + 10, this->y() + (this->boundingRect().height() - b->boundingRect().height()) / 2);
+            }
+            this->scene()->addItem(b);
+            if(enemyList->size() > 0){
+                b->setTarget(enemyList->front());
+            }
             connect(timer, &QTimer::timeout, b, &bullet::fly);
         }
         attackCooldown.start();
