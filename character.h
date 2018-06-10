@@ -26,8 +26,8 @@ public:
     virtual void attack(QTimer *timer) = 0;
     virtual bool hit() = 0;
     bool isdead();
-    int hp;
-    int borderX, borderY;
+    int hp, initialHp;
+    QRectF border;
     QTime attackCooldown;
     QList<bullet> normalBullets;
 };
@@ -48,7 +48,6 @@ public:
     virtual ~wallet();
     virtual void attack(QTimer *timer);
     virtual bool hit();
-    virtual void move(qreal vx, qreal vy);
     virtual void setPosition(qreal x, qreal y);
     QGraphicsPixmapItem *heart;
 };

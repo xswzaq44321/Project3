@@ -3,21 +3,20 @@
 
 #include <QDebug>
 
-QRectF borderOfBullet = QRectF(-100, -100, 722, 846);
-QRectF borderOfCharacter = QRectF(0, 0, 622, 746);
+QRectF borderOfBullet = QRectF(-100, -100, 722, 866);
+QRectF borderOfCharacter = QRectF(0, 0, 622, 766);
 QList<QGraphicsItem*> *enemyList;
 QList<QGraphicsItem*> *myBullitList;
 QList<QGraphicsItem*> *enemyBullitList;
 MainWindow::MainWindow(QWidget *parent):
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    scene(new QGraphicsScene(borderOfCharacter)),
+    scene(new QGraphicsScene(0, 0, 1022, 766)),
     timer(new QTimer),
     respawnTime(new QTime)
 {
     ui->setupUi(this);
     this->setFixedSize(1024, 768);
-    ui->graphicsView->setGeometry(-1, 21, borderOfCharacter.width() + 2, borderOfCharacter.height() + 2);
     ui->graphicsView->setScene(scene);
     ui->graphicsView->installEventFilter(this);
     timer->start(10);
@@ -41,8 +40,11 @@ MainWindow::MainWindow(QWidget *parent):
     scene->addItem(boss);
     scene->addItem(player);
     scene->addItem(dynamic_cast<wallet*>(player)->heart);
-    boss->setPosition((borderOfCharacter.width() - boss->boundingRect().width()) / 2, 0);
+    boss->setPosition((borderOfCharacter.width() - boss->boundingRect().width()) / 2, 0 + 40);
     player->setPosition((borderOfCharacter.width() - player->boundingRect().width()) / 2, 766 - player->boundingRect().height());
+    bossHealth = scene->addRect(10, 10, borderOfCharacter.width() - 20, 10, QPen(QColor(0, 0, 0, 0)), QBrush(QColor(200, 0, 0)));
+    bossHealth->setZValue(100);
+    scene->addRect(622, 0, 400, 766, QPen(QColor(0, 0, 0, 0)), QBrush(QColor(47, 63, 86)))->setZValue(100);
 }
 
 MainWindow::~MainWindow()
@@ -228,5 +230,6 @@ void MainWindow::attackHandler(){
     }
     if(boss != NULL){
         boss->attack(timer);
+        bossHealth->setRect(10, 10, (borderOfCharacter.width() - 20)*((float)boss->hp / boss->initialHp), 10);
     }
 }

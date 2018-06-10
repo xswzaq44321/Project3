@@ -49,6 +49,7 @@ private:
     QGraphicsPixmapItem *item;
     QTimer *timer;
     QTime *respawnTime;
+    QGraphicsRectItem *bossHealth;
     character *boss, *player;
     bool moving[4] = {0};
     int speed = 2;

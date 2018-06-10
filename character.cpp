@@ -9,11 +9,11 @@ character::character():
 
 character::character(const QString &filename, int hp_init):
     QGraphicsPixmapItem(QPixmap(filename).scaled(64, 88)),
-    hp(hp_init)
+    hp(hp_init),
+    initialHp(hp_init)
 {
     attackCooldown.start();
-    borderX = borderOfCharacter.width() - this->boundingRect().width();
-    borderY = borderOfCharacter.height() - this->boundingRect().height();
+    border.setCoords(0, 0, borderOfCharacter.width() - this->boundingRect().width(), borderOfCharacter.height() - this->boundingRect().height());
 }
 
 character::~character(){
@@ -22,10 +22,10 @@ character::~character(){
 void character::move(qreal vx, qreal vy){
     qreal x = this->x() + vx;
     qreal y = this->y() - vy;
-    if(x > borderX) x = borderX;
-    else if(x < 0) x = 0;
-    if(y > borderY) y = borderY;
-    else if(y < 0) y = 0;
+    if(x > border.right()) x = border.right();
+    else if(x < border.x()) x = border.x();
+    if(y > border.bottom()) y = border.bottom();
+    else if(y < border.y()) y = border.y();
     this->setPosition(x, y);
 }
 
@@ -69,7 +69,7 @@ void gaben_reimu::attack(QTimer *timer){
 
 bool gaben_reimu::hit(){
     --hp;
-    qDebug() << "ouch! " << hp;
+//    qDebug() << "ouch! " << hp;
     if(hp == 0){
         return true;
     }
@@ -77,14 +77,23 @@ bool gaben_reimu::hit(){
 }
 
 wallet::wallet():
-    character(":/player/res/Savings.png", 1000),
+    character(":/player/res/Savings.png", 3),
     heart(new QGraphicsPixmapItem(QPixmap(":/player/res/heart.png").scaled(10, 10)))
 {
+    this->border.setCoords(-(this->boundingRect().width() - this->heart->boundingRect().width()) / 2,
+                           -(this->boundingRect().height() - this->heart->boundingRect().height()) / 2,
+                           borderOfCharacter.width() - (this->boundingRect().width() + this->heart->boundingRect().width()) / 2,
+                           borderOfCharacter.height() - (this->boundingRect().height() + this->heart->boundingRect().height()) / 2);
     this->setZValue(0);
     this->heart->setZValue(30);
     normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/USD/50_cent.png", 0, 0, 0, 10, 30, this));
     normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/USD/50_cent.png", 0, 0, 1, 10, 30, this));
     normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/USD/50_cent.png", 0, 0, -1, 10, 30, this));
+}
+
+wallet::~wallet(){
+    this->scene()->removeItem(this->heart);
+    this->scene()->removeItem(this);
 }
 
 void wallet::attack(QTimer *timer){
@@ -99,27 +108,13 @@ void wallet::attack(QTimer *timer){
     }
 }
 
-void wallet::move(qreal vx, qreal vy){
-    qreal x = this->x() + vx;
-    qreal y = this->y() - vy;
-    if(x > borderX) x = borderX;
-    else if(x < 0) x = 0;
-    if(y > borderY) y = borderY;
-    else if(y < 0) y = 0;
-    this->setPosition(x, y);
-}
-
 void wallet::setPosition(qreal x, qreal y){
     this->setPos(x, y);
-    this->heart->setPos(x + this->boundingRect().width()/2,
-                        y + this->boundingRect().height()/2);
-}
-
-wallet::~wallet(){
-    this->scene()->removeItem(this->heart);
-    this->scene()->removeItem(this);
+    this->heart->setPos(x + (this->boundingRect().width() - this->heart->boundingRect().width()) / 2,
+                        y + (this->boundingRect().height() - this->heart->boundingRect().height()) / 2);
 }
 
 bool wallet::hit(){
     --hp;
+    qDebug() << "player hp = " << hp;
 }
