@@ -9,27 +9,58 @@
 #include <QDebug>
 #include <QTimer>
 #include <QtMath>
+#include <QPointF>
+#include <algorithm>
 
 extern QRectF borderOfBullet;
+extern QRectF borderOfCharacter;
 extern QList<QGraphicsItem*> *enemyList;
+extern QList<QGraphicsItem*> *myBulletList;
+extern QList<QGraphicsItem*> *enemyBulletList;
 
 class bullet: public QObject, public QGraphicsPixmapItem
 {
     Q_OBJECT
 
 public:
-    bullet(const QString &filename = nullptr, qreal x = -1, qreal y = -1, qreal r = 0, qreal theta = 0, int size = 15, QGraphicsItem *parent = nullptr);
+    bullet(const QString &filename = nullptr, QPointF polar = QPointF(0, 0),
+           QPointF picSize = QPointF(15, 15), bool from_player = false);
     bullet(const bullet &old);
     ~bullet();
     bullet& operator =(const bullet& r);
     void setPolar(qreal r, qreal theta);
     void setTarget(QGraphicsItem *target);
-    QGraphicsItem *origin, *target;
+    QGraphicsItem *target;
+    bool fromPlayer;
 public slots:
-    void fly();
-private:
+    virtual void fly();
+protected:
     qreal r;
     qreal theta;
+};
+
+class traceBullet: public bullet
+{
+    Q_OBJECT
+
+public:
+    traceBullet();
+    traceBullet(const QString &filename, QPointF polar, QPointF picSize);
+    traceBullet(const bullet &old);
+public slots:
+    virtual void fly();
+};
+
+class bounceSale: public bullet
+{
+    Q_OBJECT
+
+public:
+    bounceSale();
+    bounceSale(const QString &filename, QPointF polar, QPointF picSize);
+    bounceSale(const bullet &old);
+public slots:
+    virtual void fly();
 };
 
 #endif // BULLET_H

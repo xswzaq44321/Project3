@@ -14,6 +14,8 @@
 
 extern QRectF borderOfCharacter;
 extern QList<QGraphicsItem*> *enemyList;
+extern QList<QGraphicsItem*> *enemyBulletList;
+extern QList<QGraphicsItem*> *myBulletList;
 class character: public QObject, public QGraphicsPixmapItem
 {
     Q_OBJECT
@@ -35,7 +37,7 @@ public:
 
 class gaben_reimu: public character{
 public:
-    gaben_reimu();
+    gaben_reimu(int health = 1000);
     virtual ~gaben_reimu();
     virtual void attack(QTimer *timer);
     virtual bool hit();
@@ -51,6 +53,8 @@ public:
     virtual bool hit();
     virtual void setPosition(qreal x, qreal y);
     QGraphicsPixmapItem *heart;
+private:
+    int attackCounter = 0;
 };
 
 #endif // CHARACTER_H
