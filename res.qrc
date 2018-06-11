@@ -23,7 +23,9 @@
         <file>res/Savings.png</file>
         <file>res/heart.png</file>
     </qresource>
-    <qresource prefix="/texts">
+    <qresource prefix="/pics">
+        <file>res/score_background.png</file>
         <file>res/GameOver.png</file>
+        <file>res/error.png</file>
     </qresource>
 </RCC>

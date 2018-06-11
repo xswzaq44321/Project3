@@ -6,9 +6,9 @@
 QFont mainFont("Hylia Serif Beta");
 QRectF borderOfBullet = QRectF(-100, -100, 722, 866);
 QRectF borderOfCharacter = QRectF(0, 0, 622, 766);
-QList<QGraphicsItem*> *enemyList;
-QList<QGraphicsItem*> *myBullitList;
-QList<QGraphicsItem*> *enemyBullitList;
+QList<QGraphicsItem*> *enemyList = new QList<QGraphicsItem*>();
+QList<QGraphicsItem*> *myBulletList = new QList<QGraphicsItem*>();
+QList<QGraphicsItem*> *enemyBulletList = new QList<QGraphicsItem*>();
 MainWindow::MainWindow(QWidget *parent):
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -21,7 +21,6 @@ MainWindow::MainWindow(QWidget *parent):
     ui->graphicsView->setScene(scene);
     ui->graphicsView->installEventFilter(this);
     timer->start(10);
-    respawnTime->start();
     moveKeys.insert(Qt::Key_Up);
     moveKeys.insert(Qt::Key_Down);
     moveKeys.insert(Qt::Key_Left);
@@ -29,23 +28,31 @@ MainWindow::MainWindow(QWidget *parent):
     functionKeys.insert(Qt::Key_Z);
     functionKeys.insert(Qt::Key_X);
     functionKeys.insert(Qt::Key_Shift);
+    enemyList->clear();
+    enemyBulletList->clear();
+    myBulletList->clear();
     connect(this->timer, SIGNAL(timeout()), this, SLOT(moveHandler()));
     connect(this->timer, SIGNAL(timeout()), this, SLOT(collidingDetect()));
     connect(this->timer, SIGNAL(timeout()), this, SLOT(attackHandler()));
 
-    enemyList = new QList<QGraphicsItem*>();
-    myBullitList = new QList<QGraphicsItem*>();
-    enemyBullitList = new QList<QGraphicsItem*>();
-    boss = new gaben_reimu;
-    player = new wallet;
+    QPixmap *scorePixmap = new QPixmap(":/pics/res/score_background.png");
+    scorePixmap->scaled(400, 766);
+    QGraphicsPixmapItem *scoreItem = new QGraphicsPixmapItem(*scorePixmap);
+    scoreItem->setPos(622, 0);
+    scoreItem->setZValue(100);
+    scene->addItem(scoreItem);
+
+    boss = new gaben_reimu(1000);
     scene->addItem(boss);
+    boss->setPosition((borderOfCharacter.width() - boss->boundingRect().width()) / 2, 0 + 40);
+    bossHealth = scene->addRect(10, 10, borderOfCharacter.width() - 20, 10, QPen(QColor(0, 0, 0, 0)), QBrush(QColor(200, 0, 0)));
+    bossHealth->setZValue(0);
+    enemyList->insert(enemyList->end(), boss);
+
+    player = new wallet;
     scene->addItem(player);
     scene->addItem(dynamic_cast<wallet*>(player)->heart);
-    boss->setPosition((borderOfCharacter.width() - boss->boundingRect().width()) / 2, 0 + 40);
     player->setPosition((borderOfCharacter.width() - player->boundingRect().width()) / 2, 766 - player->boundingRect().height());
-    bossHealth = scene->addRect(10, 10, borderOfCharacter.width() - 20, 10, QPen(QColor(0, 0, 0, 0)), QBrush(QColor(200, 0, 0)));
-    bossHealth->setZValue(90);
-    scene->addRect(622, 0, 400, 766, QPen(QColor(0, 0, 0, 0)), QBrush(QColor(47, 63, 86)))->setZValue(100);
 }
 
 MainWindow::~MainWindow()
@@ -149,31 +156,9 @@ void MainWindow::moveHandler(){
 }
 
 bool MainWindow::collidingDetect(){
-    QList<QGraphicsItem*> all = scene->items();
-    enemyList->clear();
-    myBullitList->clear();
-    enemyBullitList->clear();
-    for(QGraphicsItem* it:all){
-        character *who;
-        bullet *b;
-        if((who = dynamic_cast<character*>(it)) != 0){
-            if(who != player){
-                enemyList->insert(enemyList->end(), it);
-            }
-            continue;
-        }
-        if((b = dynamic_cast<bullet*>(it)) != 0){
-            if(b->origin == player){
-                myBullitList->insert(myBullitList->end(), it);
-            }else{
-                enemyBullitList->insert(enemyBullitList->end(), it);
-            }
-            continue;
-        }
-    }
-    //    qDebug() << myBullitList->size();
+//    qDebug() << myBulletList->size() + enemyBulletList->size();
     if(!playerIsDead){
-        for(QGraphicsItem* it:((*enemyList) + (*enemyBullitList))){ // see if player hits enemy
+        for(QGraphicsItem* it:((*enemyList) + (*enemyBulletList))){ // see if player hits enemy
             if(dynamic_cast<wallet*>(player)->heart->collidesWithItem(it)){
                 qDebug() << "player died";
                 qDebug() << "respawn in 2 sec...";
@@ -181,12 +166,18 @@ bool MainWindow::collidingDetect(){
                 this->scene->removeItem(player);
                 playerIsDead = true;
                 if(player->hit()){ // hit will return whether player is under 6-ft
-                    QGraphicsPixmapItem *over = new QGraphicsPixmapItem(QPixmap(":/texts/res/GameOver.png"));
-                    over->setZValue(100);
+                    QPixmap *overPic = new QPixmap(borderOfCharacter.width(), borderOfCharacter.height());
+                    overPic->fill(Qt::transparent);
+                    QPainter painter(overPic);
+                    painter.fillRect(borderOfCharacter, QColor(0, 0, 0, 100));
+                    painter.setOpacity(0.7);
+                    painter.drawPixmap(0, 0, borderOfCharacter.width(), borderOfCharacter.height(), QPixmap(":/pics/res/GameOver.png"));
+                    QGraphicsPixmapItem *over = new QGraphicsPixmapItem(*overPic);
+                    over->setZValue(110);
                     over->setPos(0, 0);
                     scene->addItem(over);
                 }else{
-                    respawnTime->restart();
+                    respawnTime->start();
                     connect(this->timer, SIGNAL(timeout()), this, SLOT(respawn()));
                 }
                 return true;
@@ -194,7 +185,7 @@ bool MainWindow::collidingDetect(){
         }
     }
     for(auto it = enemyList->begin(); it != enemyList->end(); ++it){
-        for(auto jt = myBullitList->begin(); jt != myBullitList->end(); ++jt){
+        for(auto jt = myBulletList->begin(); jt != myBulletList->end(); ++jt){
             if((*it) == nullptr || (*jt) == nullptr) continue;
             if((*it)->collidesWithItem(*jt)){
                 bool isDead = dynamic_cast<character*>(*it)->hit();
@@ -209,6 +200,12 @@ bool MainWindow::collidingDetect(){
                 }
             }
         }
+    }
+    for(int i = 0; i < myBulletList->count(nullptr); ++i){
+        myBulletList->removeOne(nullptr);
+    }
+    for(int i = 0; i < enemyBulletList->count(nullptr); ++i){
+        enemyBulletList->removeOne(nullptr);
     }
     return false;
 }
