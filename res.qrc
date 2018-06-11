@@ -24,7 +24,7 @@
         <file>res/heart.png</file>
     </qresource>
     <qresource prefix="/pics">
-        <file>res/score_background.png</file>
+        <file>res/info_board_background.png</file>
         <file>res/GameOver.png</file>
         <file>res/error.png</file>
     </qresource>

@@ -44,17 +44,19 @@ private slots:
     bool collidingDetect();
     void respawn();
     void attackHandler();
+    void infoBoardHandler();
 
 private:
     Ui::MainWindow *ui;
     QGraphicsScene *scene;
-    QGraphicsPixmapItem *item;
+    QGraphicsRectItem *bossHealth;
+    QGraphicsTextItem *scoreText;
     QTimer *timer;
     QTime *respawnTime;
-    QGraphicsRectItem *bossHealth;
     character *boss, *player;
     bool moving[4] = {0};
     int speed = 2;
+    int score = 0;
     bool attack = false;
     bool playerIsDead = false;
     set<int> moveKeys;

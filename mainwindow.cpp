@@ -3,7 +3,7 @@
 
 #include <QDebug>
 
-QFont mainFont("Hylia Serif Beta");
+QFont mainFont("Arial");
 QRectF borderOfBullet = QRectF(-100, -100, 722, 866);
 QRectF borderOfCharacter = QRectF(0, 0, 622, 766);
 QList<QGraphicsItem*> *enemyList = new QList<QGraphicsItem*>();
@@ -34,13 +34,21 @@ MainWindow::MainWindow(QWidget *parent):
     connect(this->timer, SIGNAL(timeout()), this, SLOT(moveHandler()));
     connect(this->timer, SIGNAL(timeout()), this, SLOT(collidingDetect()));
     connect(this->timer, SIGNAL(timeout()), this, SLOT(attackHandler()));
+    connect(this->timer, SIGNAL(timeout()), this, SLOT(infoBoardHandler()));
 
-    QPixmap *scorePixmap = new QPixmap(":/pics/res/score_background.png");
-    scorePixmap->scaled(400, 766);
-    QGraphicsPixmapItem *scoreItem = new QGraphicsPixmapItem(*scorePixmap);
-    scoreItem->setPos(622, 0);
-    scoreItem->setZValue(100);
-    scene->addItem(scoreItem);
+    QPixmap *infoPixmap = new QPixmap(":/pics/res/info_board_background.png");
+    infoPixmap->scaled(400, 766);
+    QGraphicsPixmapItem *infoItem = new QGraphicsPixmapItem(*infoPixmap);
+    infoItem->setPos(622, 0);
+    infoItem->setZValue(100);
+    scene->addItem(infoItem);
+
+    QFont scoreFont = QFont(mainFont);
+    scoreFont.setPixelSize(40);
+    scoreText = scene->addText("", scoreFont);
+    scoreText->setDefaultTextColor(QColor(255, 255, 255));
+    scoreText->setPos(672, 50);
+    scoreText->setZValue(110);
 
     boss = new gaben_reimu(1000);
     scene->addItem(boss);
@@ -230,11 +238,21 @@ void MainWindow::respawn(){
 }
 
 void MainWindow::attackHandler(){
+    if(!playerIsDead)
+        ++score;
     if(attack && !playerIsDead){ // player attacks
         player->attack(timer);
     }
     if(boss != NULL){
         boss->attack(timer);
         bossHealth->setRect(10, 10, (borderOfCharacter.width() - 20)*((float)boss->hp / boss->initialHp), 10);
+    }
+}
+
+void MainWindow::infoBoardHandler(){
+    {
+        char temp[100];
+        sprintf(temp, "Score:%08d", score);
+        scoreText->setPlainText(QString::fromLocal8Bit(temp));
     }
 }
