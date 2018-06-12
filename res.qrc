@@ -28,4 +28,8 @@
         <file>res/GameOver.png</file>
         <file>res/error.png</file>
     </qresource>
+    <qresource prefix="/audio">
+        <file>res/Thanks and Have Fun, Gabe Newell.mp3</file>
+        <file>res/GabeN_song.mp3</file>
+    </qresource>
 </RCC>

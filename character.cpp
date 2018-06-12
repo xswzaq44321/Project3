@@ -48,7 +48,7 @@ gaben_reimu::~gaben_reimu(){
 
 void gaben_reimu::attack(QTimer *timer){
     if(attackCooldown.elapsed() >= 2000){
-        if((attackCounter += timer->interval()) % 200 == 0){
+        if((attackCounter += timer->interval()) % 200 < timer->interval()){
             for(double theta = 0; theta <= 2*M_PI; theta += 2*M_PI/50){
                 bullet *b = new bullet(normalBullets.at(0));
                 enemyBulletList->insert(enemyBulletList->end(), b);
@@ -75,12 +75,12 @@ void gaben_reimu::attack(QTimer *timer){
                 b->setZValue(10);
                 b->setPos(this->x() + this->boundingRect().width()/2 - b->boundingRect().width()/2,
                           this->y() + this->boundingRect().height()/2 - b->boundingRect().height()/2 + 50);
-                b->setPolar(5, -M_PI/6);
+                b->setPolar(3, -(qrand() % 121 + 30)*(M_PI/180));
                 this->scene()->addItem(b);
                 connect(timer, &QTimer::timeout, b, &bullet::fly);
             }
         }
-        if(attackCounter > 600){
+        if(attackCounter > 1000){
             attackCooldown.start();
             attackCounter = 0;
         }
