@@ -93,7 +93,7 @@ void traceBullet::fly(){
         if(dx < 0){
             direction += M_PI;
         }
-        this->setPolar(r, theta + (direction - theta) / 3);
+        this->setPolar(r, theta + (direction - theta) / 1);
 //        qDebug() << (target->y() - this->y()) << (target->x() - this->x());
     }
     this->setPos(this->x() + r * qCos(theta), this->y() - r * qSin(theta));

@@ -49,8 +49,8 @@ gaben_reimu::~gaben_reimu(){
 }
 
 void gaben_reimu::attack(QTimer *timer){
-    if(attackCooldown.elapsed() >= 2000){
-        if((attackCounter += timer->interval()) % 200 < timer->interval()){
+    if(attackCooldown.elapsed() >= 3000){
+        if((attackCounter += timer->interval()) % 500 < timer->interval()){
             for(int i = 1; i >= -1; i -= 2){
                 for(double theta = 0; theta <= 2*M_PI; theta += 2*M_PI/50){
                     bullet *b = new bullet(normalBullets.at(0));
@@ -58,7 +58,7 @@ void gaben_reimu::attack(QTimer *timer){
                     b->setZValue(10);
                     b->setPos(this->x() + this->boundingRect().width()/2 - b->boundingRect().width()/2 + 100 * cos(theta),
                               this->y() + this->boundingRect().height()/2 - b->boundingRect().height()/2  - 100 * sin(theta));
-                    b->setDirection(2, theta + i*M_PI_2);
+                    b->setDirection(1, theta + i*M_PI_2);
                     this->scene()->addItem(b);
                     connect(timer, &QTimer::timeout, b, &bullet::fly);
                 }
@@ -69,12 +69,12 @@ void gaben_reimu::attack(QTimer *timer){
                 b->setZValue(10);
                 b->setPos(this->x() + this->boundingRect().width()/2 - b->boundingRect().width()/2,
                           this->y() + this->boundingRect().height()/2 - b->boundingRect().height()/2 + 50);
-                b->setDirection(3, -(qrand() % 121 + 30)*(M_PI/180));
+                b->setDirection(2, -(qrand() % 121 + 30)*(M_PI/180));
                 this->scene()->addItem(b);
                 connect(timer, &QTimer::timeout, b, &bullet::fly);
             }
         }
-        if(attackCounter > 1000){
+        if(attackCounter > 2000){
             attackCooldown.start();
             attackCounter = 0;
         }

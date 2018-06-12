@@ -165,12 +165,12 @@ void MainWindow::moveHandler(){
         player->move(vx, vy);
         //        qDebug() << vx << vy;
     }
-    static int bossDirection = 2;
+    static int bossDirection = 1;
     if(boss != NULL){
         boss->move(bossDirection, 0);
-    }
-    if(boss->x() < borderOfCharacter.width() / 4 || boss->x() > borderOfCharacter.width() * 3 / 4){
-        bossDirection *= -1;
+        if(boss->x() < borderOfCharacter.width() / 4 || boss->x() > borderOfCharacter.width() * 3 / 4){
+            bossDirection *= -1;
+        }
     }
 }
 
