@@ -27,6 +27,7 @@ extern QRectF borderOfCharacter;
 extern QList<QGraphicsItem*> *enemyList;
 extern QList<QGraphicsItem*> *myBulletList;
 extern QList<QGraphicsItem*> *enemyBulletList;
+extern QTimer *timer;
 
 class MainWindow : public QMainWindow
 {
@@ -51,7 +52,6 @@ private:
     QGraphicsScene *scene;
     QGraphicsRectItem *bossHealth;
     QGraphicsTextItem *scoreText;
-    QTimer *timer;
     QTime *respawnTime;
     character *boss, *player;
     bool moving[4] = {0};

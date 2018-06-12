@@ -3,24 +3,28 @@
 
 #include <QDebug>
 
+QTimer *timer;
 QFont mainFont("Arial");
 QRectF borderOfBullet = QRectF(-100, -100, 722, 866);
 QRectF borderOfCharacter = QRectF(0, 0, 622, 766);
-QList<QGraphicsItem*> *enemyList = new QList<QGraphicsItem*>();
-QList<QGraphicsItem*> *myBulletList = new QList<QGraphicsItem*>();
-QList<QGraphicsItem*> *enemyBulletList = new QList<QGraphicsItem*>();
+QList<QGraphicsItem*> *enemyList;
+QList<QGraphicsItem*> *myBulletList;
+QList<QGraphicsItem*> *enemyBulletList;
 MainWindow::MainWindow(QWidget *parent):
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     scene(new QGraphicsScene(0, 0, 1022, 766)),
-    timer(new QTimer),
     respawnTime(new QTime)
 {
+    timer = new QTimer();
+    enemyList = new QList<QGraphicsItem*>();
+    myBulletList = new QList<QGraphicsItem*>();
+    enemyBulletList = new QList<QGraphicsItem*>();
     ui->setupUi(this);
     this->setFixedSize(1024, 768);
     ui->graphicsView->setScene(scene);
     ui->graphicsView->installEventFilter(this);
-    timer->start(10);
+    timer->start(16);
     moveKeys.insert(Qt::Key_Up);
     moveKeys.insert(Qt::Key_Down);
     moveKeys.insert(Qt::Key_Left);
@@ -31,10 +35,10 @@ MainWindow::MainWindow(QWidget *parent):
     enemyList->clear();
     enemyBulletList->clear();
     myBulletList->clear();
-    connect(this->timer, SIGNAL(timeout()), this, SLOT(moveHandler()));
-    connect(this->timer, SIGNAL(timeout()), this, SLOT(collidingDetect()));
-    connect(this->timer, SIGNAL(timeout()), this, SLOT(attackHandler()));
-    connect(this->timer, SIGNAL(timeout()), this, SLOT(infoBoardHandler()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(moveHandler()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(collidingDetect()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(attackHandler()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(infoBoardHandler()));
 
     QPixmap *infoPixmap = new QPixmap(":/pics/res/info_board_background.png");
     infoPixmap->scaled(400, 766);
@@ -141,30 +145,37 @@ void MainWindow::keyReleaseEvent(QKeyEvent *e){
 }
 
 void MainWindow::moveHandler(){
-    double vx = 0, vy = 0;
-    if(moving[0]){
-        vy += 1;
-    }
-    if(moving[1]){
-        vy -= 1;
-    }
-    if(moving[2]){
-        vx -= 1;
-    }
-    if(moving[3]){
-        vx += 1;
-    }
-    if(player != NULL){
+    if(!playerIsDead){
+        double vx = 0, vy = 0;
+        if(moving[0]){
+            vy += 1;
+        }
+        if(moving[1]){
+            vy -= 1;
+        }
+        if(moving[2]){
+            vx -= 1;
+        }
+        if(moving[3]){
+            vx += 1;
+        }
         double r = sqrt(vx*vx + vy*vy);
         vx = (r == 0 ? 0 : vx/r * speed);
         vy = (r == 0 ? 0 : vy/r * speed);
         player->move(vx, vy);
-//        qDebug() << vx << vy;
+        //        qDebug() << vx << vy;
+    }
+    static int bossDirection = 2;
+    if(boss != NULL){
+        boss->move(bossDirection, 0);
+    }
+    if(boss->x() < borderOfCharacter.width() / 4 || boss->x() > borderOfCharacter.width() * 3 / 4){
+        bossDirection *= -1;
     }
 }
 
 bool MainWindow::collidingDetect(){
-//    qDebug() << myBulletList->size() + enemyBulletList->size();
+    qDebug() << myBulletList->size() + enemyBulletList->size();
     if(!playerIsDead){
         for(QGraphicsItem* it:((*enemyList) + (*enemyBulletList))){ // see if player hits enemy
             if(dynamic_cast<wallet*>(player)->heart->collidesWithItem(it)){
@@ -186,7 +197,7 @@ bool MainWindow::collidingDetect(){
                     scene->addItem(over);
                 }else{
                     respawnTime->start();
-                    connect(this->timer, SIGNAL(timeout()), this, SLOT(respawn()));
+                    connect(timer, SIGNAL(timeout()), this, SLOT(respawn()));
                 }
                 return true;
             }
@@ -219,8 +230,7 @@ bool MainWindow::collidingDetect(){
 }
 
 void MainWindow::respawn(){
-    disconnect(this->timer, SIGNAL(timeout()), this, SLOT(moveHandler()));
-    disconnect(this->timer, SIGNAL(timeout()), this, SLOT(attackHandler()));
+    disconnect(timer, SIGNAL(timeout()), this, SLOT(attackHandler()));
     if(respawnTime->elapsed() >= 1000){
         if(playerIsDead){
             scene->addItem(player);
@@ -231,15 +241,14 @@ void MainWindow::respawn(){
             return;
         }
         playerIsDead = false;
-        disconnect(this->timer, SIGNAL(timeout()), this, SLOT(respawn()));
-        connect(this->timer, SIGNAL(timeout()), this, SLOT(moveHandler()));
-        connect(this->timer, SIGNAL(timeout()), this, SLOT(attackHandler()));
+        disconnect(timer, SIGNAL(timeout()), this, SLOT(respawn()));
+        connect(timer, SIGNAL(timeout()), this, SLOT(attackHandler()));
     }
 }
 
 void MainWindow::attackHandler(){
     if(!playerIsDead)
-        ++score;
+        score += timer->interval() / 10.0;
     if(attack && !playerIsDead){ // player attacks
         player->attack(timer);
     }

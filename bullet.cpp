@@ -4,7 +4,7 @@ bullet::bullet(const QString &filename, QPointF polar, QPointF picSize, bool fro
     QGraphicsPixmapItem(QPixmap(filename).scaled(picSize.x(), picSize.y())),
     target(nullptr),
     fromPlayer(from_player),
-    r(polar.x()),
+    r(polar.x() * timer->interval() / 10.0),
     theta(polar.y())
 {
     this->setPos(-1, -1);
@@ -26,9 +26,11 @@ bullet::~bullet(){
     if(fromPlayer){
         auto index = std::find(myBulletList->begin(), myBulletList->end(), this);
         *index = nullptr;
+//        myBulletList->removeOne(this);
     }else{
         auto index = std::find(enemyBulletList->begin(), enemyBulletList->end(), this);
         *index = nullptr;
+//        enemyBulletList->removeOne(this);
     }
 }
 
@@ -40,6 +42,12 @@ bullet& bullet::operator =(const bullet& R){
     r = R.r;
     theta = R.theta;
     return *this;
+}
+
+void bullet::setDirection(qreal r, qreal theta){
+    r *= timer->interval() / 10.0;
+    this->r = r;
+    this->theta = theta;
 }
 
 void bullet::setPolar(qreal r, qreal theta){
@@ -95,22 +103,22 @@ void traceBullet::fly(){
     }
 }
 
-bounceSale::bounceSale():
+bounceBullet::bounceBullet():
     bullet(":/pics/res/error.png")
 {
 }
 
-bounceSale::bounceSale(const QString &filename, QPointF polar, QPointF picSize):
+bounceBullet::bounceBullet(const QString &filename, QPointF polar, QPointF picSize):
     bullet(filename, polar, picSize)
 {
 }
 
-bounceSale::bounceSale(const bullet &old):
+bounceBullet::bounceBullet(const bullet &old):
     bullet(old)
 {
 }
 
-void bounceSale::fly(){
+void bounceBullet::fly(){
     this->setPos(this->x() + r * qCos(theta), this->y() - r * qSin(theta));
     if(this->x() < 0 || this->x() > (borderOfCharacter.width() - this->boundingRect().width())){
         theta = theta - 2*(M_PI_2 - fabs(theta));

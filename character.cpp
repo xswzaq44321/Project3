@@ -20,6 +20,8 @@ character::~character(){
 }
 
 void character::move(qreal vx, qreal vy){
+    vx *= timer->interval() / 10.0;
+    vy *= timer->interval() / 10.0;
     qreal x = this->x() + vx;
     qreal y = this->y() - vy;
     if(x > border.right()) x = border.right();
@@ -38,7 +40,7 @@ gaben_reimu::gaben_reimu(int health):
 {
     this->setZValue(20);
     normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/steam_logo.png", QPointF(0, 0), QPointF(10, 10)));
-    normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/50%.png", QPointF(0, 0), QPointF(75, 35)));
+    normalBullets.insert(normalBullets.end(), bullet(":/bullets/res/50%.png", QPointF(0, 0), QPointF(40, 20)));
 }
 
 gaben_reimu::~gaben_reimu(){
@@ -49,33 +51,25 @@ gaben_reimu::~gaben_reimu(){
 void gaben_reimu::attack(QTimer *timer){
     if(attackCooldown.elapsed() >= 2000){
         if((attackCounter += timer->interval()) % 200 < timer->interval()){
-            for(double theta = 0; theta <= 2*M_PI; theta += 2*M_PI/50){
-                bullet *b = new bullet(normalBullets.at(0));
-                enemyBulletList->insert(enemyBulletList->end(), b);
-                b->setZValue(10);
-                b->setPos(this->x() + this->boundingRect().width()/2 - b->boundingRect().width()/2 + 100 * cos(theta),
-                          this->y() + this->boundingRect().height()/2 - b->boundingRect().height()/2  - 100 * sin(theta));
-                b->setPolar(2, theta + M_PI_2);
-                this->scene()->addItem(b);
-                connect(timer, &QTimer::timeout, b, &bullet::fly);
-            }
-            for(double theta = 0; theta <= 2*M_PI; theta += 2*M_PI/50){
-                bullet *b = new bullet(normalBullets.at(0));
-                enemyBulletList->insert(enemyBulletList->end(), b);
-                b->setZValue(10);
-                b->setPos(this->x() + this->boundingRect().width()/2 - b->boundingRect().height()/2 + 100 * cos(theta),
-                          this->y() + this->boundingRect().height()/2 - b->boundingRect().height()/2 - 100 * sin(theta));
-                b->setPolar(2, theta - M_PI_2);
-                this->scene()->addItem(b);
-                connect(timer, &QTimer::timeout, b, &bullet::fly);
+            for(int i = 1; i >= -1; i -= 2){
+                for(double theta = 0; theta <= 2*M_PI; theta += 2*M_PI/50){
+                    bullet *b = new bullet(normalBullets.at(0));
+                    enemyBulletList->insert(enemyBulletList->end(), b);
+                    b->setZValue(10);
+                    b->setPos(this->x() + this->boundingRect().width()/2 - b->boundingRect().width()/2 + 100 * cos(theta),
+                              this->y() + this->boundingRect().height()/2 - b->boundingRect().height()/2  - 100 * sin(theta));
+                    b->setDirection(2, theta + i*M_PI_2);
+                    this->scene()->addItem(b);
+                    connect(timer, &QTimer::timeout, b, &bullet::fly);
+                }
             }
             {
-                bullet *b = new bounceSale(normalBullets.at(1));
+                bullet *b = new bounceBullet(normalBullets.at(1));
                 enemyBulletList->insert(enemyBulletList->end(), b);
                 b->setZValue(10);
                 b->setPos(this->x() + this->boundingRect().width()/2 - b->boundingRect().width()/2,
                           this->y() + this->boundingRect().height()/2 - b->boundingRect().height()/2 + 50);
-                b->setPolar(3, -(qrand() % 121 + 30)*(M_PI/180));
+                b->setDirection(3, -(qrand() % 121 + 30)*(M_PI/180));
                 this->scene()->addItem(b);
                 connect(timer, &QTimer::timeout, b, &bullet::fly);
             }

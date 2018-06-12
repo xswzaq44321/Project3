@@ -12,6 +12,7 @@
 #include <QPointF>
 #include <algorithm>
 
+extern QTimer *timer;
 extern QRectF borderOfBullet;
 extern QRectF borderOfCharacter;
 extern QList<QGraphicsItem*> *enemyList;
@@ -28,13 +29,14 @@ public:
     bullet(const bullet &old);
     ~bullet();
     bullet& operator =(const bullet& r);
-    void setPolar(qreal r, qreal theta);
+    void setDirection(qreal r, qreal theta);
     void setTarget(QGraphicsItem *target);
     QGraphicsItem *target;
     bool fromPlayer;
 public slots:
     virtual void fly();
 protected:
+    void setPolar(qreal r, qreal theta);
     qreal r;
     qreal theta;
 };
@@ -51,14 +53,14 @@ public slots:
     virtual void fly();
 };
 
-class bounceSale: public bullet
+class bounceBullet: public bullet
 {
     Q_OBJECT
 
 public:
-    bounceSale();
-    bounceSale(const QString &filename, QPointF polar, QPointF picSize);
-    bounceSale(const bullet &old);
+    bounceBullet();
+    bounceBullet(const QString &filename, QPointF polar, QPointF picSize);
+    bounceBullet(const bullet &old);
 public slots:
     virtual void fly();
 };
