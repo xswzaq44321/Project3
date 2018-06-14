@@ -46,25 +46,9 @@ MainWindow::~MainWindow()
     delete ui;
     disconnect(timer);
     delete timer;
-    for(auto it = enemyList->begin(); it != enemyList->end(); ++it){
-        delete (*it);
-    }
-    enemyList->clear();
     delete enemyList;
-    for(auto it = myBulletList->begin(); it != myBulletList->end(); ++it){
-        delete (*it);
-    }
-    myBulletList->clear();
     delete myBulletList;
-    for(auto it = missileList->begin(); it != missileList->end(); ++it){
-        delete (*it);
-    }
-    missileList->clear();
     delete missileList;
-    for(auto it = enemyBulletList->begin(); it != enemyBulletList->end(); ++it){
-        delete (*it);
-    }
-    enemyBulletList->clear();
     delete enemyBulletList;
     delete bossHealth;
     delete scoreText;
@@ -94,11 +78,12 @@ void MainWindow::gameStart(){
     scoreText->setPos(672, 50);
     scoreText->setZValue(110);
 
-    lifeCanvas = new QPixmap(300, 50);
+    lifeCanvas = new QPixmap(300, 100);
     lifeCanvas->fill(Qt::transparent);
     lifePainter = new QPainter(lifeCanvas);
     for(int i = 0; i < 3; ++i){
         lifePainter->drawPixmap(0 + 60 * i, 3, QPixmap(":/player/res/Savings.png").scaled(36, 44));
+        lifePainter->drawPixmap(0 + 60 * i, 63, QPixmap(":/bullets/res/card/master.png").scaled(36, 22.5));
     }
     life = new QGraphicsPixmapItem(*lifeCanvas);
     life->setZValue(110);
@@ -250,6 +235,7 @@ bool MainWindow::collidingDetect(){
         for(auto jt = myBulletList->begin(); jt != myBulletList->end(); ++jt){
             if((*it) == nullptr || (*jt) == nullptr) continue;
             if((*it)->collidesWithItem(*jt)){
+                score += 10;
                 bool isDead = dynamic_cast<character*>(*it)->hit();
                 delete (*jt);
                 (*jt) = nullptr;
@@ -267,6 +253,7 @@ bool MainWindow::collidingDetect(){
         for(auto jt = enemyList->begin(); jt != enemyList->end(); ++jt){
             if((it) == nullptr || (*jt) == nullptr) continue;
             if((it)->collidesWithItem(*jt)){
+                score += 1 * timer->interval()/10.0;
                 bool isDead = dynamic_cast<character*>(*jt)->hit();
                 if(isDead){
                     if(*jt == boss){ // if dead one is boss
@@ -297,33 +284,34 @@ bool MainWindow::collidingDetect(){
 }
 
 void MainWindow::respawn(){
-    disconnect(timer, SIGNAL(timeout()), this, SLOT(attackHandler()));
     if(respawnTime->elapsed() >= 1000){
-        if(playerIsDead){
+        if(respawnTime->elapsed() % 1000 < timer->interval()){
             scene->addItem(player);
             scene->addItem(dynamic_cast<wallet*>(player)->heart);
-            playerIsDead = false;
         }
         if(respawnTime->elapsed() <= 2000){
             player->setPosition((borderOfCharacter.width() - player->boundingRect().width()) /  2, scene->height() - player->boundingRect().height()*((respawnTime->elapsed() - 1000.0) / 1000.0));
             return;
         }
         disconnect(timer, SIGNAL(timeout()), this, SLOT(respawn()));
-        connect(timer, SIGNAL(timeout()), this, SLOT(attackHandler()));
+        playerIsDead = false;
     }
 }
 
 void MainWindow::attackHandler(){
     if(player != NULL){
         if(!playerIsDead){
-            score += timer->interval() / 10.0;
             if(attack){ // player attacks
                 player->attack();
             }
             if(bigOne){
-                dynamic_cast<wallet*>(player)->bigOneAttack();
+                bool success = dynamic_cast<wallet*>(player)->bigOneAttack();
+                if(success)
+                    respawnTime->start();
                 bigOne = false;
             }
+        }else{
+            bigOne = false;
         }
     }
     if(boss != NULL){
@@ -333,24 +321,37 @@ void MainWindow::attackHandler(){
 
 void MainWindow::infoBoardHandler(){
     static int playerLife = 3;
+    static int playerSpell = 3;
     {
         char temp[100];
         sprintf(temp, "Score:%08d", score);
         scoreText->setPlainText(QString::fromLocal8Bit(temp));
     }
-    if(player != nullptr && player->hp != playerLife){
+    if(player != nullptr && (player->hp != playerLife || dynamic_cast<wallet*>(player)->spells != playerSpell)){
         if(player->hp > playerLife){
             for(int i = playerLife; i < player->hp; ++i){
                 lifePainter->drawPixmap(i * 60, 3, QPixmap(":/player/res/Savings.png").scaled(36, 44));
             }
-            playerLife = player->hp;
         }else{
 //            qDebug() << "erase";
             lifePainter->setCompositionMode(QPainter::CompositionMode_Source);
             lifePainter->fillRect(player->hp * 60, 0, 300, 50, Qt::transparent);
             lifePainter->setCompositionMode(QPainter::CompositionMode_SourceOver);
-            playerLife = player->hp;
         }
+        playerLife = player->hp;
+
+        int spells = dynamic_cast<wallet*>(player)->spells;
+        if(spells > playerSpell){
+            for(int i = playerSpell; i < spells; ++i){
+                lifePainter->drawPixmap(i * 60, 63, QPixmap(":/bullets/res/card/master.png").scaled(36, 22.5));
+            }
+        }else{
+            lifePainter->setCompositionMode(QPainter::CompositionMode_Source);
+            lifePainter->fillRect(spells * 60, 50, 300, 50, Qt::transparent);
+            lifePainter->setCompositionMode(QPainter::CompositionMode_SourceOver);
+        }
+        playerSpell = spells;
+
         life->setPixmap(*lifeCanvas);
     }
     if(boss != nullptr){

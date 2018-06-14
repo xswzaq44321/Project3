@@ -5,6 +5,7 @@ character::character():
     hp(0)
 {
     attackCooldown.start();
+    spellCooldown.start();
 }
 
 character::character(const QString &filename, int hp_init):
@@ -13,6 +14,7 @@ character::character(const QString &filename, int hp_init):
     initialHp(hp_init)
 {
     attackCooldown.start();
+    spellCooldown.start();
     border.setCoords(0, 0, borderOfCharacter.width() - this->boundingRect().width(), borderOfCharacter.height() - this->boundingRect().height());
 }
 
@@ -82,7 +84,6 @@ void gaben_reimu::attack(){
     case 1:
         if(attackCooldown.elapsed() >= 3000){
             if(attackCounter == 0){
-                qDebug() << "I'm moving me";
                 this->moveTo((borderOfCharacter.width() - this->boundingRect().width()) / 2 + (qrand() % 3 - 1)*150, 40, 1000);
             }
             if((attackCounter += timer->interval()) % 1000 < timer->interval()){
@@ -188,6 +189,7 @@ wallet::wallet():
 }
 
 wallet::~wallet(){
+    qDebug() << "wallet dtor";
     this->scene()->removeItem(this->heart);
     this->scene()->removeItem(this);
     delete heart;
@@ -223,19 +225,22 @@ void wallet::attack(){
     }
 }
 
-void wallet::bigOneAttack(){
-    if(spells > 0){
+bool wallet::bigOneAttack(){
+    if(spells > 0 && spellCooldown.elapsed() >= 4000){
         for(int i = 0; i < 5; ++i){
             bullet *b = new missile(missiles.at(qrand() % missiles.size()));
             missileList->insert(missileList->end(), b);
-            b->setPos(this->x() + this->boundingRect().width() / 2 - b->boundingRect().width() / 2,
-                      this->y() + this->boundingRect().height() / 2 - b->boundingRect().height() / 2);
-            b->setDirection(7.5, M_PI * (i / 4));
+            b->setPos(this->x() + this->boundingRect().width() / 2 - b->boundingRect().width() / 2 + 50*cos(2*M_PI * (i / 5.0)),
+                      this->y() + this->boundingRect().height() / 2 - b->boundingRect().height() / 2 + 50*sin(2*M_PI * (i / 5.0)));
+            b->setDirection(7.5, 2*M_PI * (i / 5.0));
             this->scene()->addItem(b);
             connect(timer, &QTimer::timeout, b, &bullet::fly);
         }
         --spells;
+        spellCooldown.start();
+        return true;
     }
+    return false;
 }
 
 void wallet::setPosition(qreal x, qreal y){

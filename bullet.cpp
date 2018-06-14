@@ -170,10 +170,10 @@ void missile::fly(){
         double direction = qAtan2(dy, dx);
         double error = direction - theta;
         if(error > M_PI) error -= 2*M_PI;
-        this->setPolar(r, theta + (error) / 6);
+        this->setPolar(r, theta + (error) / 5);
     }
     this->setPos(this->x() + r * qCos(theta), this->y() - r * qSin(theta));
-    if(!borderOfBullet.contains(this->x(), this->y()) || liveTime.elapsed() > 4000){
+    if(liveTime.elapsed() > 4000){
         this->scene()->removeItem(this);
         delete this;
     }

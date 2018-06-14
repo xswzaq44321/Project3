@@ -38,10 +38,11 @@ public:
     bool isdead();
     int hp, initialHp;
     QRectF border;
-    QTime attackCooldown;
-    QList<bullet> bullets;
     QTimer moveTimer;
     QTime moveClock;
+    QTime attackCooldown;
+    QTime spellCooldown;
+    QList<bullet> bullets;
 };
 
 class gaben_reimu: public character{
@@ -60,14 +61,14 @@ public:
     wallet();
     virtual ~wallet();
     virtual void attack();
-    void bigOneAttack();
+    bool bigOneAttack();
     virtual bool hit();
     virtual void setPosition(qreal x, qreal y);
     QGraphicsPixmapItem *heart;
     QList<bullet> missiles;
+    int spells = 3;
 private:
     int attackCounter = 0;
-    int spells = 3;
 };
 
 #endif // CHARACTER_H
