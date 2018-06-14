@@ -39,6 +39,7 @@ public:
     bool eventFilter(QObject *watched, QEvent *event);
     virtual void keyPressEvent(QKeyEvent *e);
     virtual void keyReleaseEvent(QKeyEvent *e);
+    void gameStart();
 
 private slots:
     void moveHandler();
@@ -52,8 +53,11 @@ private:
     QGraphicsScene *scene;
     QGraphicsRectItem *bossHealth;
     QGraphicsTextItem *scoreText;
+    QGraphicsPixmapItem *life;
+    QPixmap *lifeCanvas;
+    QPainter *lifePainter;
     QTime *respawnTime;
-    character *boss, *player;
+    character *boss = nullptr, *player = nullptr;
     bool moving[4] = {0};
     int speed = 2;
     int score = 0;

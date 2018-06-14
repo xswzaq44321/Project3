@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent):
     ui->graphicsView->setScene(scene);
     ui->graphicsView->installEventFilter(this);
     timer->start(16);
+    respawnTime->start();
     moveKeys.insert(Qt::Key_Up);
     moveKeys.insert(Qt::Key_Down);
     moveKeys.insert(Qt::Key_Left);
@@ -32,6 +33,16 @@ MainWindow::MainWindow(QWidget *parent):
     functionKeys.insert(Qt::Key_Z);
     functionKeys.insert(Qt::Key_X);
     functionKeys.insert(Qt::Key_Shift);
+
+    gameStart();
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+void MainWindow::gameStart(){
     enemyList->clear();
     enemyBulletList->clear();
     myBulletList->clear();
@@ -54,7 +65,18 @@ MainWindow::MainWindow(QWidget *parent):
     scoreText->setPos(672, 50);
     scoreText->setZValue(110);
 
-    boss = new gaben_reimu(1000);
+    lifeCanvas = new QPixmap(300, 50);
+    lifeCanvas->fill(Qt::transparent);
+    lifePainter = new QPainter(lifeCanvas);
+    for(int i = 0; i < 3; ++i){
+        lifePainter->drawPixmap(0 + 60 * i, 3, QPixmap(":/player/res/Savings.png").scaled(36, 44));
+    }
+    life = new QGraphicsPixmapItem(*lifeCanvas);
+    life->setZValue(110);
+    life->setPos(672, 100);
+    scene->addItem(life);
+
+    boss = new gaben_reimu(3000);
     scene->addItem(boss);
     boss->setPosition((borderOfCharacter.width() - boss->boundingRect().width()) / 2, 0 + 40);
     bossHealth = scene->addRect(10, 10, borderOfCharacter.width() - 20, 10, QPen(QColor(0, 0, 0, 0)), QBrush(QColor(200, 0, 0)));
@@ -65,11 +87,6 @@ MainWindow::MainWindow(QWidget *parent):
     scene->addItem(player);
     scene->addItem(dynamic_cast<wallet*>(player)->heart);
     player->setPosition((borderOfCharacter.width() - player->boundingRect().width()) / 2, 766 - player->boundingRect().height());
-}
-
-MainWindow::~MainWindow()
-{
-    delete ui;
 }
 
 bool MainWindow::eventFilter(QObject *watched, QEvent *event){
@@ -145,38 +162,33 @@ void MainWindow::keyReleaseEvent(QKeyEvent *e){
 }
 
 void MainWindow::moveHandler(){
-    if(!playerIsDead){
-        double vx = 0, vy = 0;
-        if(moving[0]){
-            vy += 1;
-        }
-        if(moving[1]){
-            vy -= 1;
-        }
-        if(moving[2]){
-            vx -= 1;
-        }
-        if(moving[3]){
-            vx += 1;
-        }
-        double r = sqrt(vx*vx + vy*vy);
-        vx = (r == 0 ? 0 : vx/r * speed);
-        vy = (r == 0 ? 0 : vy/r * speed);
-        player->move(vx, vy);
-        //        qDebug() << vx << vy;
-    }
-    static int bossDirection = 1;
-    if(boss != NULL){
-        boss->move(bossDirection, 0);
-        if(boss->x() < borderOfCharacter.width() / 4 || boss->x() > borderOfCharacter.width() * 3 / 4){
-            bossDirection *= -1;
+    if(player != NULL){
+        if(!playerIsDead){
+            double vx = 0, vy = 0;
+            if(moving[0]){
+                vy += 1;
+            }
+            if(moving[1]){
+                vy -= 1;
+            }
+            if(moving[2]){
+                vx -= 1;
+            }
+            if(moving[3]){
+                vx += 1;
+            }
+            double r = sqrt(vx*vx + vy*vy);
+            vx = (r == 0 ? 0 : vx/r * speed);
+            vy = (r == 0 ? 0 : vy/r * speed);
+            player->move(vx, vy);
+            //        qDebug() << vx << vy;
         }
     }
 }
 
 bool MainWindow::collidingDetect(){
-    qDebug() << myBulletList->size() + enemyBulletList->size();
-    if(!playerIsDead){
+//    qDebug() << myBulletList->size() + enemyBulletList->size();
+    if(respawnTime->elapsed() > 4000){
         for(QGraphicsItem* it:((*enemyList) + (*enemyBulletList))){ // see if player hits enemy
             if(dynamic_cast<wallet*>(player)->heart->collidesWithItem(it)){
                 qDebug() << "player died";
@@ -235,22 +247,24 @@ void MainWindow::respawn(){
         if(playerIsDead){
             scene->addItem(player);
             scene->addItem(dynamic_cast<wallet*>(player)->heart);
+            playerIsDead = false;
         }
         if(respawnTime->elapsed() <= 2000){
             player->setPosition((borderOfCharacter.width() - player->boundingRect().width()) /  2, scene->height() - player->boundingRect().height()*((respawnTime->elapsed() - 1000.0) / 1000.0));
             return;
         }
-        playerIsDead = false;
         disconnect(timer, SIGNAL(timeout()), this, SLOT(respawn()));
         connect(timer, SIGNAL(timeout()), this, SLOT(attackHandler()));
     }
 }
 
 void MainWindow::attackHandler(){
-    if(!playerIsDead)
-        score += timer->interval() / 10.0;
-    if(attack && !playerIsDead){ // player attacks
-        player->attack(timer);
+    if(player != NULL){
+        if(!playerIsDead)
+            score += timer->interval() / 10.0;
+        if(attack && !playerIsDead){ // player attacks
+            player->attack(timer);
+        }
     }
     if(boss != NULL){
         boss->attack(timer);
@@ -259,9 +273,25 @@ void MainWindow::attackHandler(){
 }
 
 void MainWindow::infoBoardHandler(){
+    static int playerLife = 3;
     {
         char temp[100];
         sprintf(temp, "Score:%08d", score);
         scoreText->setPlainText(QString::fromLocal8Bit(temp));
+    }
+    if(player != nullptr && player->hp != playerLife){
+        if(player->hp > playerLife){
+            for(int i = playerLife; i < player->hp; ++i){
+                lifePainter->drawPixmap(i * 60, 3, QPixmap(":/player/res/Savings.png").scaled(36, 44));
+            }
+            playerLife = player->hp;
+        }else{
+//            qDebug() << "erase";
+            lifePainter->setCompositionMode(QPainter::CompositionMode_Source);
+            lifePainter->fillRect(player->hp * 60, 0, 300, 50, Qt::transparent);
+            lifePainter->setCompositionMode(QPainter::CompositionMode_SourceOver);
+            playerLife = player->hp;
+        }
+        life->setPixmap(*lifeCanvas);
     }
 }

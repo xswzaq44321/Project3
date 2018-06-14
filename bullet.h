@@ -24,14 +24,12 @@ class bullet: public QObject, public QGraphicsPixmapItem
     Q_OBJECT
 
 public:
-    bullet(const QString &filename = nullptr, QPointF polar = QPointF(0, 0),
+    bullet(const QString &filename = ":/pics/res/error.png", QPointF polar = QPointF(0, 0),
            QPointF picSize = QPointF(15, 15), bool from_player = false);
     bullet(const bullet &old);
     ~bullet();
     bullet& operator =(const bullet& r);
     void setDirection(qreal r, qreal theta);
-    void setTarget(QGraphicsItem *target);
-    QGraphicsItem *target;
     bool fromPlayer;
 public slots:
     virtual void fly();
@@ -49,8 +47,11 @@ public:
     traceBullet();
     traceBullet(const QString &filename, QPointF polar, QPointF picSize);
     traceBullet(const bullet &old);
+    void setTarget(QGraphicsItem *target);
 public slots:
     virtual void fly();
+private:
+    QGraphicsItem *target;
 };
 
 class bounceBullet: public bullet
@@ -63,6 +64,20 @@ public:
     bounceBullet(const bullet &old);
 public slots:
     virtual void fly();
+};
+
+class missile: public bullet
+{
+    Q_OBJECT
+
+public:
+    missile();
+    missile(const QString &filename, QPointF polar, QPointF picSize);
+    missile(const missile &old);
+public slots:
+    virtual void fly();
+private:
+    QGraphicsItem *target;
 };
 
 #endif // BULLET_H

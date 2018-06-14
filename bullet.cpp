@@ -2,7 +2,6 @@
 
 bullet::bullet(const QString &filename, QPointF polar, QPointF picSize, bool from_player):
     QGraphicsPixmapItem(QPixmap(filename).scaled(picSize.x(), picSize.y())),
-    target(nullptr),
     fromPlayer(from_player),
     r(polar.x() * timer->interval() / 10.0),
     theta(polar.y())
@@ -13,7 +12,6 @@ bullet::bullet(const QString &filename, QPointF polar, QPointF picSize, bool fro
 bullet::bullet(const bullet &old):
     QObject(),
     QGraphicsPixmapItem(old.pixmap()),
-    target(nullptr),
     fromPlayer(old.fromPlayer),
     r(old.r),
     theta(old.theta)
@@ -37,7 +35,6 @@ bullet::~bullet(){
 bullet& bullet::operator =(const bullet& R){
     this->setPixmap(R.pixmap());
     this->setPos(R.x(), R.y());
-    target = R.target;
     fromPlayer = R.fromPlayer;
     r = R.r;
     theta = R.theta;
@@ -63,12 +60,8 @@ void bullet::fly(){
     }
 }
 
-void bullet::setTarget(QGraphicsItem *target){
-    this->target = target;
-}
-
 traceBullet::traceBullet():
-    bullet(":/pics/res/error.png", QPointF(10, M_PI_2), QPointF(30, 30), true)
+    bullet(":/pics/res/error.png")
 {
 }
 
@@ -80,6 +73,10 @@ traceBullet::traceBullet(const QString &filename, QPointF polar, QPointF picSize
 traceBullet::traceBullet(const bullet &old):
     bullet(old)
 {
+}
+
+void traceBullet::setTarget(QGraphicsItem *target){
+    this->target = target;
 }
 
 void traceBullet::fly(){
@@ -104,7 +101,7 @@ void traceBullet::fly(){
 }
 
 bounceBullet::bounceBullet():
-    bullet(":/pics/res/error.png")
+    bullet()
 {
 }
 
@@ -127,4 +124,23 @@ void bounceBullet::fly(){
         this->scene()->removeItem(this);
         delete this;
     }
+}
+
+missile::missile():
+    bullet()
+{
+}
+
+missile::missile(const QString &filename, QPointF polar, QPointF picSize):
+    bullet(filename, polar, picSize)
+{
+}
+
+missile::missile(const missile &old):
+    bullet(old)
+{
+}
+
+void missile::fly(){
+
 }

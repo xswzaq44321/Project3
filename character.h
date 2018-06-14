@@ -25,6 +25,7 @@ public:
     character(const QString &filename, int hp_init = 1000);
     virtual ~character();
     virtual void move(qreal vx, qreal vy);
+    virtual void moveTo(qreal x, qreal y, qreal duration);
     virtual void setPosition(qreal x, qreal y);
     virtual void attack(QTimer *timer) = 0;
     virtual bool hit() = 0;
@@ -32,7 +33,7 @@ public:
     int hp, initialHp;
     QRectF border;
     QTime attackCooldown;
-    QList<bullet> normalBullets, traceBullets;
+    QList<bullet> bullets;
 };
 
 class gaben_reimu: public character{
@@ -43,6 +44,7 @@ public:
     virtual bool hit();
 private:
     int attackCounter = 0;
+    int phase = 1;
 };
 
 class wallet: public character{
