@@ -66,10 +66,14 @@ MainWindow::~MainWindow()
     }
     enemyBulletList->clear();
     delete enemyBulletList;
-    delete scene;
+    delete bossHealth;
+    delete scoreText;
+    delete life;
+    delete infoItem;
     delete lifePainter;
     delete lifeCanvas;
     delete respawnTime;
+    delete scene;
 }
 
 void MainWindow::gameStart(){
