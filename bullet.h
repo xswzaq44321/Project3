@@ -8,9 +8,13 @@
 #include <QRectF>
 #include <QDebug>
 #include <QTimer>
+#include <QTime>
 #include <QtMath>
 #include <QPointF>
 #include <algorithm>
+#include "character.h"
+
+class character;
 
 extern QTimer *timer;
 extern QRectF borderOfBullet;
@@ -18,6 +22,8 @@ extern QRectF borderOfCharacter;
 extern QList<QGraphicsItem*> *enemyList;
 extern QList<QGraphicsItem*> *myBulletList;
 extern QList<QGraphicsItem*> *enemyBulletList;
+extern QList<QGraphicsItem*> *missileList;
+extern character *boss, *player;
 
 class bullet: public QObject, public QGraphicsPixmapItem
 {
@@ -25,12 +31,12 @@ class bullet: public QObject, public QGraphicsPixmapItem
 
 public:
     bullet(const QString &filename = ":/pics/res/error.png", QPointF polar = QPointF(0, 0),
-           QPointF picSize = QPointF(15, 15), bool from_player = false);
+           QPointF picSize = QPointF(15, 15), QGraphicsItem *who = nullptr);
     bullet(const bullet &old);
     ~bullet();
     bullet& operator =(const bullet& r);
     void setDirection(qreal r, qreal theta);
-    bool fromPlayer;
+    QGraphicsItem *origin;
 public slots:
     virtual void fly();
 protected:
@@ -45,7 +51,7 @@ class traceBullet: public bullet
 
 public:
     traceBullet();
-    traceBullet(const QString &filename, QPointF polar, QPointF picSize);
+    traceBullet(const QString &filename, QPointF polar, QPointF picSize, QGraphicsItem *who);
     traceBullet(const bullet &old);
     void setTarget(QGraphicsItem *target);
 public slots:
@@ -60,7 +66,7 @@ class bounceBullet: public bullet
 
 public:
     bounceBullet();
-    bounceBullet(const QString &filename, QPointF polar, QPointF picSize);
+    bounceBullet(const QString &filename, QPointF polar, QPointF picSize, QGraphicsItem *who);
     bounceBullet(const bullet &old);
 public slots:
     virtual void fly();
@@ -72,12 +78,14 @@ class missile: public bullet
 
 public:
     missile();
-    missile(const QString &filename, QPointF polar, QPointF picSize);
-    missile(const missile &old);
+    missile(const QString &filename, QPointF polar, QPointF picSize, QGraphicsItem *who);
+    missile(const bullet &old);
+    void setTarget(QGraphicsItem *target);
 public slots:
     virtual void fly();
 private:
     QGraphicsItem *target;
+    QTime liveTime;
 };
 
 #endif // BULLET_H

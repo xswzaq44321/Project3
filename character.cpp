@@ -17,6 +17,9 @@ character::character(const QString &filename, int hp_init):
 }
 
 character::~character(){
+    if(moveTimer.isActive()){
+        disconnect(&moveTimer);
+    }
 }
 
 void character::move(qreal vx, qreal vy){
@@ -32,31 +35,26 @@ void character::move(qreal vx, qreal vy){
 }
 
 void character::moveTo(qreal x, qreal y, qreal duration){
-    static QTimer *clock = nullptr;
-    static QTime *moveClock = nullptr;
     static qreal vx = 0;
     static qreal vy = 0;
     static qreal dur = 0;
-    if(clock == nullptr && moveClock == nullptr){
-        clock = new QTimer;
-        moveClock = new QTime;
-        clock->start(timer->interval());
-        moveClock->start();
-        vx = (x - this->x()) / duration * 10.0;
-        vy = (this->y() - y) / duration * 10.0;
-        dur = duration;
+    if(moveTimer.isActive()){
+        disconnect(&moveTimer, 0, 0, 0);
     }
-    connect(clock, &QTimer::timeout, [this](void){
-        this->move(vx, vy);
-        if(moveClock->elapsed() >= dur){
-            qDebug() << "disconnect";
-            disconnect(clock);
-            delete clock;
-            delete moveClock;
-            clock = nullptr;
-            moveClock = nullptr;
-            qDebug() << this->x() << this->y();
+    moveTimer.start(timer->interval());
+    moveClock.start();
+    vx = (x - this->x()) / duration * 10.0;
+    vy = (this->y() - y) / duration * 10.0;
+    dur = duration;
+    connect(&moveTimer, &QTimer::timeout, [this](void){
+        if(moveClock.elapsed() >= dur){
+            disconnect(&moveTimer, 0, 0, 0);
+            moveTimer.stop();
+//            qDebug() << "disconnect";
+//            qDebug() << this->x() << this->y();
+            return;
         }
+        this->move(vx, vy);
     });
 }
 
@@ -79,10 +77,14 @@ gaben_reimu::~gaben_reimu(){
     this->scene()->removeItem(this);
 }
 
-void gaben_reimu::attack(QTimer *timer){
+void gaben_reimu::attack(){
     switch(phase){
     case 1:
         if(attackCooldown.elapsed() >= 3000){
+            if(attackCounter == 0){
+                qDebug() << "I'm moving me";
+                this->moveTo((borderOfCharacter.width() - this->boundingRect().width()) / 2 + (qrand() % 3 - 1)*150, 40, 1000);
+            }
             if((attackCounter += timer->interval()) % 1000 < timer->interval()){
                 for(int i = 1; i >= -1; i -= 2){
                     for(double theta = 0; theta <= 2*M_PI; theta += 2*M_PI/50){
@@ -97,12 +99,16 @@ void gaben_reimu::attack(QTimer *timer){
                     }
                 }
                 {
+                    double dx =(player->x() + player->boundingRect().width() / 2) - (this->x() + this->boundingRect().width() / 2);
+                    double dy =(this->y() + this->boundingRect().height() / 2) - (player->y() + player->boundingRect().height() / 2);
+                    double direction = qAtan2(dy, dx);
+//                    qDebug() << direction;
                     bullet *b = new bounceBullet(bullets.at(1));
                     enemyBulletList->insert(enemyBulletList->end(), b);
                     b->setZValue(10);
                     b->setPos(this->x() + this->boundingRect().width()/2 - b->boundingRect().width()/2,
                               this->y() + this->boundingRect().height()/2 - b->boundingRect().height()/2 + 50);
-                    b->setDirection(1.5, -(qrand() % 121 + 30)*(M_PI/180));
+                    b->setDirection(1.5, direction + qDegreesToRadians((double)(qrand() % 121 - 60)));
                     this->scene()->addItem(b);
                     connect(timer, &QTimer::timeout, b, &bullet::fly);
                 }
@@ -113,7 +119,10 @@ void gaben_reimu::attack(QTimer *timer){
             }
         }
         break;
-    case 2:
+    case 2: case 3:
+        if(attackCooldown.elapsed() <= timer->interval() + 2){
+            this->moveTo((borderOfCharacter.width() - this->boundingRect().width()) / 2, 40, 1000);
+        }
         if(attackCooldown.elapsed() >= 3000){
             if((attackCounter += timer->interval()) % 600 < timer->interval()){
                 bullet *b = new bounceBullet(bullets.at(2));
@@ -136,6 +145,7 @@ void gaben_reimu::attack(QTimer *timer){
                 connect(timer, &QTimer::timeout, b, &bullet::fly);
             }
         }
+        break;
     }
 }
 
@@ -144,9 +154,13 @@ bool gaben_reimu::hit(){
 //    qDebug() << "ouch! " << hp;
     if(hp == initialHp * 2 / 3){
         phase = 2;
+        this->moveTo((borderOfCharacter.width() - this->boundingRect().width()) / 2, 0 + 40, 500);
+        attackCooldown.start();
+    }else if(hp == initialHp / 3){
+        phase = 3;
         attackCooldown.start();
     }
-    if(hp == 0){
+    if(hp <= 0){
         return true;
     }
     return false;
@@ -154,7 +168,7 @@ bool gaben_reimu::hit(){
 
 wallet::wallet():
     character(":/player/res/Savings.png", 3),
-    heart(new QGraphicsPixmapItem(QPixmap(":/player/res/heart.png").scaled(7.5, 7.5)))
+    heart(new QGraphicsPixmapItem(QPixmap(":/player/res/heart.png").scaled(8, 8)))
 {
     this->border.setCoords(-(this->boundingRect().width() - this->heart->boundingRect().width()) / 2,
                            -(this->boundingRect().height() - this->heart->boundingRect().height()) / 2,
@@ -162,19 +176,24 @@ wallet::wallet():
                            borderOfCharacter.height() - (this->boundingRect().height() + this->heart->boundingRect().height()) / 2);
     this->setZValue(0);
     this->heart->setZValue(30);
-    bullets.insert(bullets.end(), bullet(":/bullets/res/NTD/10_dollor.png", QPointF(10, M_PI_2), QPointF(30, 30), true));
-    bullets.insert(bullets.end(), bullet(":/bullets/res/NTD/10_dollor.png", QPointF(10, M_PI_2 + 0.09), QPointF(30, 30), true));
-    bullets.insert(bullets.end(), bullet(":/bullets/res/NTD/10_dollor.png", QPointF(10, M_PI_2 - 0.09), QPointF(30, 30), true));
-    bullets.insert(bullets.end(), bullet(":/bullets/res/NTD/50_dollor.png", QPointF(10, M_PI_2 - 0.18), QPointF(30, 30), true));
-    bullets.insert(bullets.end(), bullet(":/bullets/res/NTD/50_dollor.png", QPointF(10, M_PI_2 + 0.18), QPointF(30, 30), true));
+    bullets.insert(bullets.end(), bullet(":/bullets/res/NTD/10_dollor.png", QPointF(10, M_PI_2), QPointF(30, 30), this));
+    bullets.insert(bullets.end(), bullet(":/bullets/res/NTD/10_dollor.png", QPointF(10, M_PI_2 + 0.09), QPointF(30, 30), this));
+    bullets.insert(bullets.end(), bullet(":/bullets/res/NTD/10_dollor.png", QPointF(10, M_PI_2 - 0.09), QPointF(30, 30), this));
+    bullets.insert(bullets.end(), bullet(":/bullets/res/NTD/50_dollor.png", QPointF(10, M_PI_2 - 0.18), QPointF(30, 30), this));
+    bullets.insert(bullets.end(), bullet(":/bullets/res/NTD/50_dollor.png", QPointF(10, M_PI_2 + 0.18), QPointF(30, 30), this));
+    missiles.insert(missiles.end(), bullet(":/bullets/res/card/citi.png", QPointF(7.5, 0), QPointF(80, 50), this));
+    missiles.insert(missiles.end(), bullet(":/bullets/res/card/master.png", QPointF(7.5, 0), QPointF(80, 50), this));
+    missiles.insert(missiles.end(), bullet(":/bullets/res/card/standard.png", QPointF(7.5, 0), QPointF(80, 50), this));
+    missiles.insert(missiles.end(), bullet(":/bullets/res/card/visa.png", QPointF(7.5, 0), QPointF(80, 50), this));
 }
 
 wallet::~wallet(){
     this->scene()->removeItem(this->heart);
     this->scene()->removeItem(this);
+    delete heart;
 }
 
-void wallet::attack(QTimer *timer){
+void wallet::attack(){
     if(attackCooldown.elapsed() >= 40){
         for(int i = 0; i <= 2; ++i){
             bullet *b = new bullet(bullets.at(i));
@@ -201,6 +220,21 @@ void wallet::attack(QTimer *timer){
             attackCounter = 0;
         }
         attackCooldown.start();
+    }
+}
+
+void wallet::bigOneAttack(){
+    if(spells > 0){
+        for(int i = 0; i < 5; ++i){
+            bullet *b = new missile(missiles.at(qrand() % missiles.size()));
+            missileList->insert(missileList->end(), b);
+            b->setPos(this->x() + this->boundingRect().width() / 2 - b->boundingRect().width() / 2,
+                      this->y() + this->boundingRect().height() / 2 - b->boundingRect().height() / 2);
+            b->setDirection(7.5, M_PI * (i / 4));
+            this->scene()->addItem(b);
+            connect(timer, &QTimer::timeout, b, &bullet::fly);
+        }
+        --spells;
     }
 }
 

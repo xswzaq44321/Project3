@@ -11,11 +11,17 @@
 #include <QTime>
 #include <QDebug>
 #include "bullet.h"
+#include "character.h"
 
+class bullet;
+class character;
+extern character *player, *boss;
 extern QRectF borderOfCharacter;
 extern QList<QGraphicsItem*> *enemyList;
 extern QList<QGraphicsItem*> *enemyBulletList;
 extern QList<QGraphicsItem*> *myBulletList;
+extern QList<QGraphicsItem*> *missileList;
+
 class character: public QObject, public QGraphicsPixmapItem
 {
     Q_OBJECT
@@ -27,20 +33,22 @@ public:
     virtual void move(qreal vx, qreal vy);
     virtual void moveTo(qreal x, qreal y, qreal duration);
     virtual void setPosition(qreal x, qreal y);
-    virtual void attack(QTimer *timer) = 0;
+    virtual void attack() = 0;
     virtual bool hit() = 0;
     bool isdead();
     int hp, initialHp;
     QRectF border;
     QTime attackCooldown;
     QList<bullet> bullets;
+    QTimer moveTimer;
+    QTime moveClock;
 };
 
 class gaben_reimu: public character{
 public:
     gaben_reimu(int health = 1000);
     virtual ~gaben_reimu();
-    virtual void attack(QTimer *timer);
+    virtual void attack();
     virtual bool hit();
 private:
     int attackCounter = 0;
@@ -51,12 +59,15 @@ class wallet: public character{
 public:
     wallet();
     virtual ~wallet();
-    virtual void attack(QTimer *timer);
+    virtual void attack();
+    void bigOneAttack();
     virtual bool hit();
     virtual void setPosition(qreal x, qreal y);
     QGraphicsPixmapItem *heart;
+    QList<bullet> missiles;
 private:
     int attackCounter = 0;
+    int spells = 3;
 };
 
 #endif // CHARACTER_H

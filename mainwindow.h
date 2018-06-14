@@ -26,8 +26,10 @@ extern QRectF borderOfBullet;
 extern QRectF borderOfCharacter;
 extern QList<QGraphicsItem*> *enemyList;
 extern QList<QGraphicsItem*> *myBulletList;
+extern QList<QGraphicsItem*> *missileList;
 extern QList<QGraphicsItem*> *enemyBulletList;
 extern QTimer *timer;
+extern character *boss, *player;
 
 class MainWindow : public QMainWindow
 {
@@ -53,15 +55,14 @@ private:
     QGraphicsScene *scene;
     QGraphicsRectItem *bossHealth;
     QGraphicsTextItem *scoreText;
-    QGraphicsPixmapItem *life;
+    QGraphicsPixmapItem *life, *infoItem;
     QPixmap *lifeCanvas;
     QPainter *lifePainter;
     QTime *respawnTime;
-    character *boss = nullptr, *player = nullptr;
     bool moving[4] = {0};
     int speed = 2;
     int score = 0;
-    bool attack = false;
+    bool attack = false, bigOne = false;
     bool playerIsDead = false;
     set<int> moveKeys;
     set<int> functionKeys;

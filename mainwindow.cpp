@@ -3,6 +3,7 @@
 
 #include <QDebug>
 
+character *boss = nullptr, *player = nullptr;
 QTimer *timer;
 QFont mainFont("Andy");
 QRectF borderOfBullet = QRectF(-100, -100, 722, 866);
@@ -10,6 +11,8 @@ QRectF borderOfCharacter = QRectF(0, 0, 622, 766);
 QList<QGraphicsItem*> *enemyList;
 QList<QGraphicsItem*> *myBulletList;
 QList<QGraphicsItem*> *enemyBulletList;
+QList<QGraphicsItem*> *missileList;
+
 MainWindow::MainWindow(QWidget *parent):
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -20,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent):
     enemyList = new QList<QGraphicsItem*>();
     myBulletList = new QList<QGraphicsItem*>();
     enemyBulletList = new QList<QGraphicsItem*>();
+    missileList = new QList<QGraphicsItem*>();
     ui->setupUi(this);
     this->setFixedSize(1024, 768);
     ui->graphicsView->setScene(scene);
@@ -40,20 +44,41 @@ MainWindow::MainWindow(QWidget *parent):
 MainWindow::~MainWindow()
 {
     delete ui;
+    disconnect(timer);
+    delete timer;
+    for(auto it = enemyList->begin(); it != enemyList->end(); ++it){
+        delete (*it);
+    }
+    enemyList->clear();
+    delete enemyList;
+    for(auto it = myBulletList->begin(); it != myBulletList->end(); ++it){
+        delete (*it);
+    }
+    myBulletList->clear();
+    delete myBulletList;
+    for(auto it = missileList->begin(); it != missileList->end(); ++it){
+        delete (*it);
+    }
+    missileList->clear();
+    delete missileList;
+    for(auto it = enemyBulletList->begin(); it != enemyBulletList->end(); ++it){
+        delete (*it);
+    }
+    enemyBulletList->clear();
+    delete enemyBulletList;
+    delete scene;
+    delete lifePainter;
+    delete lifeCanvas;
+    delete respawnTime;
 }
 
 void MainWindow::gameStart(){
-    enemyList->clear();
-    enemyBulletList->clear();
-    myBulletList->clear();
     connect(timer, SIGNAL(timeout()), this, SLOT(moveHandler()));
     connect(timer, SIGNAL(timeout()), this, SLOT(collidingDetect()));
     connect(timer, SIGNAL(timeout()), this, SLOT(attackHandler()));
     connect(timer, SIGNAL(timeout()), this, SLOT(infoBoardHandler()));
 
-    QPixmap *infoPixmap = new QPixmap(":/pics/res/info_board_background.png");
-    infoPixmap->scaled(400, 766);
-    QGraphicsPixmapItem *infoItem = new QGraphicsPixmapItem(*infoPixmap);
+    infoItem = new QGraphicsPixmapItem(QPixmap(":/pics/res/info_board_background.png").scaled(400, 766));
     infoItem->setPos(622, 0);
     infoItem->setZValue(100);
     scene->addItem(infoItem);
@@ -128,6 +153,7 @@ void MainWindow::keyPressEvent(QKeyEvent *e){
             attack = true;
             break;
         case Qt::Key_X:
+            bigOne = true;
             break;
         }
     }
@@ -190,13 +216,13 @@ bool MainWindow::collidingDetect(){
 //    qDebug() << myBulletList->size() + enemyBulletList->size();
     if(respawnTime->elapsed() > 4000){
         for(QGraphicsItem* it:((*enemyList) + (*enemyBulletList))){ // see if player hits enemy
-            if(dynamic_cast<wallet*>(player)->heart->collidesWithItem(it)){
+            if(dynamic_cast<wallet*>(player)->heart->collidesWithItem(it) && !playerIsDead){
                 qDebug() << "player died";
-                qDebug() << "respawn in 2 sec...";
                 this->scene->removeItem(dynamic_cast<wallet*>(player)->heart);
                 this->scene->removeItem(player);
                 playerIsDead = true;
                 if(player->hit()){ // hit will return whether player is under 6-ft
+                    qDebug() << "player is under 6-ft";
                     QPixmap *overPic = new QPixmap(borderOfCharacter.width(), borderOfCharacter.height());
                     overPic->fill(Qt::transparent);
                     QPainter painter(overPic);
@@ -208,6 +234,7 @@ bool MainWindow::collidingDetect(){
                     over->setPos(0, 0);
                     scene->addItem(over);
                 }else{
+                    qDebug() << "respawn in 2 sec...";
                     respawnTime->start();
                     connect(timer, SIGNAL(timeout()), this, SLOT(respawn()));
                 }
@@ -232,6 +259,30 @@ bool MainWindow::collidingDetect(){
             }
         }
     }
+    for(QGraphicsItem* it:(*missileList)){
+        for(auto jt = enemyList->begin(); jt != enemyList->end(); ++jt){
+            if((it) == nullptr || (*jt) == nullptr) continue;
+            if((it)->collidesWithItem(*jt)){
+                bool isDead = dynamic_cast<character*>(*jt)->hit();
+                if(isDead){
+                    if(*jt == boss){ // if dead one is boss
+                        boss = NULL;
+                    }
+                    delete (*jt);
+                    (*jt) = nullptr;
+                }
+            }
+        }
+        for(auto jt = enemyBulletList->begin(); jt != enemyBulletList->end(); ++jt){
+            if((it) == nullptr || (*jt) == nullptr) continue;
+            if((it)->collidesWithItem(*jt)){
+                delete (*jt);
+                (*jt) = nullptr;
+            }
+        }
+    }
+
+    // house keeping
     for(int i = 0; i < myBulletList->count(nullptr); ++i){
         myBulletList->removeOne(nullptr);
     }
@@ -260,15 +311,19 @@ void MainWindow::respawn(){
 
 void MainWindow::attackHandler(){
     if(player != NULL){
-        if(!playerIsDead)
+        if(!playerIsDead){
             score += timer->interval() / 10.0;
-        if(attack && !playerIsDead){ // player attacks
-            player->attack(timer);
+            if(attack){ // player attacks
+                player->attack();
+            }
+            if(bigOne){
+                dynamic_cast<wallet*>(player)->bigOneAttack();
+                bigOne = false;
+            }
         }
     }
     if(boss != NULL){
-        boss->attack(timer);
-        bossHealth->setRect(10, 10, (borderOfCharacter.width() - 20)*((float)boss->hp / boss->initialHp), 10);
+        boss->attack();
     }
 }
 
@@ -293,5 +348,8 @@ void MainWindow::infoBoardHandler(){
             playerLife = player->hp;
         }
         life->setPixmap(*lifeCanvas);
+    }
+    if(boss != nullptr){
+        bossHealth->setRect(10, 10, (borderOfCharacter.width() - 20)*((float)boss->hp / boss->initialHp), 10);
     }
 }

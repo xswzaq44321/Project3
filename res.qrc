@@ -18,6 +18,10 @@
         <file>res/NTD/10_dollor.png</file>
         <file>res/NTD/20_dollor.png</file>
         <file>res/NTD/50_dollor.png</file>
+        <file>res/card/citi.png</file>
+        <file>res/card/master.png</file>
+        <file>res/card/standard.png</file>
+        <file>res/card/visa.png</file>
     </qresource>
     <qresource prefix="/player">
         <file>res/Savings.png</file>

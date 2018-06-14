@@ -1,8 +1,8 @@
 #include "bullet.h"
 
-bullet::bullet(const QString &filename, QPointF polar, QPointF picSize, bool from_player):
+bullet::bullet(const QString &filename, QPointF polar, QPointF picSize, QGraphicsItem *who):
     QGraphicsPixmapItem(QPixmap(filename).scaled(picSize.x(), picSize.y())),
-    fromPlayer(from_player),
+    origin(who),
     r(polar.x() * timer->interval() / 10.0),
     theta(polar.y())
 {
@@ -12,7 +12,7 @@ bullet::bullet(const QString &filename, QPointF polar, QPointF picSize, bool fro
 bullet::bullet(const bullet &old):
     QObject(),
     QGraphicsPixmapItem(old.pixmap()),
-    fromPlayer(old.fromPlayer),
+    origin(old.origin),
     r(old.r),
     theta(old.theta)
 {
@@ -21,21 +21,27 @@ bullet::bullet(const bullet &old):
 
 bullet::~bullet(){
 //    qDebug() << "bullet dtor";
-    if(fromPlayer){
+    if(origin == player){
         auto index = std::find(myBulletList->begin(), myBulletList->end(), this);
-        *index = nullptr;
-//        myBulletList->removeOne(this);
+        if(index != myBulletList->end()){
+            *index = nullptr;
+            return;
+        }
+        index = std::find(missileList->begin(), missileList->end(), this);
+        if(index != missileList->end()){
+            *index = nullptr;
+            return;
+        }
     }else{
         auto index = std::find(enemyBulletList->begin(), enemyBulletList->end(), this);
         *index = nullptr;
-//        enemyBulletList->removeOne(this);
     }
 }
 
 bullet& bullet::operator =(const bullet& R){
     this->setPixmap(R.pixmap());
     this->setPos(R.x(), R.y());
-    fromPlayer = R.fromPlayer;
+    origin = R.origin;
     r = R.r;
     theta = R.theta;
     return *this;
@@ -65,8 +71,8 @@ traceBullet::traceBullet():
 {
 }
 
-traceBullet::traceBullet(const QString &filename, QPointF polar, QPointF picSize):
-    bullet(filename, polar, picSize, true)
+traceBullet::traceBullet(const QString &filename, QPointF polar, QPointF picSize, QGraphicsItem *who):
+    bullet(filename, polar, picSize, who)
 {
 }
 
@@ -86,12 +92,11 @@ void traceBullet::fly(){
     if(target != nullptr){
         double dx =(target->x() + target->boundingRect().width() / 2) - (this->x() + this->boundingRect().width() / 2);
         double dy =(this->y() + this->boundingRect().height() / 2) - (target->y() + target->boundingRect().height() / 2);
-        double direction = qAtan(dy / dx);
-        if(dx < 0){
-            direction += M_PI;
-        }
-        this->setPolar(r, theta + (direction - theta) / 1);
-//        qDebug() << (target->y() - this->y()) << (target->x() - this->x());
+        double direction = qAtan2(dy, dx);
+        double error = direction - theta;
+        if(error > M_PI) error -= 2*M_PI;
+        this->setPolar(r, theta + (error) / 1);
+//        qDebug() << direction;
     }
     this->setPos(this->x() + r * qCos(theta), this->y() - r * qSin(theta));
     if(!borderOfBullet.contains(this->x(), this->y())){
@@ -105,8 +110,8 @@ bounceBullet::bounceBullet():
 {
 }
 
-bounceBullet::bounceBullet(const QString &filename, QPointF polar, QPointF picSize):
-    bullet(filename, polar, picSize)
+bounceBullet::bounceBullet(const QString &filename, QPointF polar, QPointF picSize, QGraphicsItem *who):
+    bullet(filename, polar, picSize, who)
 {
 }
 
@@ -129,18 +134,47 @@ void bounceBullet::fly(){
 missile::missile():
     bullet()
 {
+    liveTime.start();
 }
 
-missile::missile(const QString &filename, QPointF polar, QPointF picSize):
-    bullet(filename, polar, picSize)
+missile::missile(const QString &filename, QPointF polar, QPointF picSize, QGraphicsItem *who):
+    bullet(filename, polar, picSize, who)
 {
+    liveTime.start();
 }
 
-missile::missile(const missile &old):
+missile::missile(const bullet &old):
     bullet(old)
 {
+    liveTime.start();
+}
+
+void missile::setTarget(QGraphicsItem *target){
+    this->target = target;
 }
 
 void missile::fly(){
-
+    if(liveTime.elapsed() < 1000){
+        target = origin;
+    }else{
+        target = nullptr;
+        if(boss != nullptr){
+            target = boss;
+        }else if(enemyList->size() > 0){
+            target = enemyList->front();
+        }
+    }
+    if(target != nullptr){
+        double dx =(target->x() + target->boundingRect().width() / 2) - (this->x() + this->boundingRect().width() / 2);
+        double dy =(this->y() + this->boundingRect().height() / 2) - (target->y() + target->boundingRect().height() / 2);
+        double direction = qAtan2(dy, dx);
+        double error = direction - theta;
+        if(error > M_PI) error -= 2*M_PI;
+        this->setPolar(r, theta + (error) / 6);
+    }
+    this->setPos(this->x() + r * qCos(theta), this->y() - r * qSin(theta));
+    if(!borderOfBullet.contains(this->x(), this->y()) || liveTime.elapsed() > 4000){
+        this->scene()->removeItem(this);
+        delete this;
+    }
 }
