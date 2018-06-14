@@ -32,4 +32,8 @@
         <file>res/Thanks and Have Fun, Gabe Newell.mp3</file>
         <file>res/GabeN_song.mp3</file>
     </qresource>
+    <qresource prefix="/font">
+        <file>res/Andy Bold.ttf</file>
+        <file>res/HyliaSerifBeta-Regular.otf</file>
+    </qresource>
 </RCC>

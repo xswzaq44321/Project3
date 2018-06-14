@@ -4,7 +4,7 @@
 #include <QDebug>
 
 QTimer *timer;
-QFont mainFont("Arial");
+QFont mainFont("Andy");
 QRectF borderOfBullet = QRectF(-100, -100, 722, 866);
 QRectF borderOfCharacter = QRectF(0, 0, 622, 766);
 QList<QGraphicsItem*> *enemyList;

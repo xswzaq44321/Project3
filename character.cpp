@@ -69,7 +69,7 @@ void gaben_reimu::attack(QTimer *timer){
                 b->setZValue(10);
                 b->setPos(this->x() + this->boundingRect().width()/2 - b->boundingRect().width()/2,
                           this->y() + this->boundingRect().height()/2 - b->boundingRect().height()/2 + 50);
-                b->setDirection(2, -(qrand() % 121 + 30)*(M_PI/180));
+                b->setDirection(1.5, -(qrand() % 121 + 30)*(M_PI/180));
                 this->scene()->addItem(b);
                 connect(timer, &QTimer::timeout, b, &bullet::fly);
             }
