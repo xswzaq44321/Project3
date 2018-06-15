@@ -3,15 +3,15 @@
 
 #include <QDebug>
 
-character *boss = nullptr, *player = nullptr;
-QTimer *timer;
 QFont mainFont("Andy");
 QRectF borderOfBullet = QRectF(-100, -100, 722, 866);
 QRectF borderOfCharacter = QRectF(0, 0, 622, 766);
-QList<QGraphicsItem*> *enemyList;
-QList<QGraphicsItem*> *myBulletList;
-QList<QGraphicsItem*> *enemyBulletList;
-QList<QGraphicsItem*> *missileList;
+QList<QGraphicsItem*> enemyList;
+QList<QGraphicsItem*> myBulletList;
+QList<QGraphicsItem*> enemyBulletList;
+QList<QGraphicsItem*> missileList;
+QTimer *timer;
+character *boss = nullptr, *player = nullptr;
 
 MainWindow::MainWindow(QWidget *parent):
     QMainWindow(parent),
@@ -19,11 +19,7 @@ MainWindow::MainWindow(QWidget *parent):
     scene(new QGraphicsScene(0, 0, 1022, 766)),
     respawnTime(new QTime)
 {
-    timer = new QTimer();
-    enemyList = new QList<QGraphicsItem*>();
-    myBulletList = new QList<QGraphicsItem*>();
-    enemyBulletList = new QList<QGraphicsItem*>();
-    missileList = new QList<QGraphicsItem*>();
+    timer = new QTimer;
     ui->setupUi(this);
     this->setFixedSize(1024, 768);
     ui->graphicsView->setScene(scene);
@@ -46,11 +42,6 @@ MainWindow::~MainWindow()
 {
     delete ui;
     disconnect(timer);
-    delete timer;
-    delete enemyList;
-    delete myBulletList;
-    delete missileList;
-    delete enemyBulletList;
     delete bossHealth;
     delete scoreText;
     delete life;
@@ -96,7 +87,7 @@ void MainWindow::gameStart(){
     boss->setPosition((borderOfCharacter.width() - boss->boundingRect().width()) / 2, 0 + 40);
     bossHealth = scene->addRect(10, 10, borderOfCharacter.width() - 20, 10, QPen(QColor(0, 0, 0, 0)), QBrush(QColor(200, 0, 0)));
     bossHealth->setZValue(0);
-    enemyList->insert(enemyList->end(), boss);
+    enemyList.insert(enemyList.end(), boss);
 
     player = new wallet;
     scene->addItem(player);
@@ -203,9 +194,9 @@ void MainWindow::moveHandler(){
 }
 
 bool MainWindow::collidingDetect(){
-//    qDebug() << myBulletList->size() + enemyBulletList->size();
+//    qDebug() << myBulletList.size() + enemyBulletList.size();
     if(respawnTime->elapsed() > 4000){
-        for(QGraphicsItem* it:((*enemyList) + (*enemyBulletList))){ // see if player hits enemy
+        for(QGraphicsItem* it:((enemyList) + (enemyBulletList))){ // see if player hits enemy
             if(dynamic_cast<wallet*>(player)->heart->collidesWithItem(it) && !playerIsDead){
                 qDebug() << "player died";
                 this->scene->removeItem(dynamic_cast<wallet*>(player)->heart);
@@ -232,8 +223,8 @@ bool MainWindow::collidingDetect(){
             }
         }
     }
-    for(auto it = enemyList->begin(); it != enemyList->end(); ++it){
-        for(auto jt = myBulletList->begin(); jt != myBulletList->end(); ++jt){
+    for(auto it = enemyList.begin(); it != enemyList.end(); ++it){
+        for(auto jt = myBulletList.begin(); jt != myBulletList.end(); ++jt){
             if((*it) == nullptr || (*jt) == nullptr) continue;
             if((*it)->collidesWithItem(*jt)){
                 score += 10;
@@ -250,8 +241,8 @@ bool MainWindow::collidingDetect(){
             }
         }
     }
-    for(QGraphicsItem* it:(*missileList)){
-        for(auto jt = enemyList->begin(); jt != enemyList->end(); ++jt){
+    for(QGraphicsItem* it:(missileList)){
+        for(auto jt = enemyList.begin(); jt != enemyList.end(); ++jt){
             if((it) == nullptr || (*jt) == nullptr) continue;
             if((it)->collidesWithItem(*jt)){
                 score += 1 * timer->interval()/10.0;
@@ -265,7 +256,7 @@ bool MainWindow::collidingDetect(){
                 }
             }
         }
-        for(auto jt = enemyBulletList->begin(); jt != enemyBulletList->end(); ++jt){
+        for(auto jt = enemyBulletList.begin(); jt != enemyBulletList.end(); ++jt){
             if((it) == nullptr || (*jt) == nullptr) continue;
             if((it)->collidesWithItem(*jt)){
                 delete (*jt);
@@ -275,11 +266,11 @@ bool MainWindow::collidingDetect(){
     }
 
     // house keeping
-    for(int i = 0; i < myBulletList->count(nullptr); ++i){
-        myBulletList->removeOne(nullptr);
+    for(int i = 0; i < myBulletList.count(nullptr); ++i){
+        myBulletList.removeOne(nullptr);
     }
-    for(int i = 0; i < enemyBulletList->count(nullptr); ++i){
-        enemyBulletList->removeOne(nullptr);
+    for(int i = 0; i < enemyBulletList.count(nullptr); ++i){
+        enemyBulletList.removeOne(nullptr);
     }
     return false;
 }

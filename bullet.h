@@ -16,13 +16,13 @@
 
 class character;
 
-extern QTimer *timer;
 extern QRectF borderOfBullet;
 extern QRectF borderOfCharacter;
-extern QList<QGraphicsItem*> *enemyList;
-extern QList<QGraphicsItem*> *myBulletList;
-extern QList<QGraphicsItem*> *enemyBulletList;
-extern QList<QGraphicsItem*> *missileList;
+extern QList<QGraphicsItem*> enemyList;
+extern QList<QGraphicsItem*> myBulletList;
+extern QList<QGraphicsItem*> enemyBulletList;
+extern QList<QGraphicsItem*> missileList;
+extern QTimer *timer;
 extern character *boss, *player;
 
 class bullet: public QObject, public QGraphicsPixmapItem

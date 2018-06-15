@@ -15,12 +15,12 @@
 
 class bullet;
 class character;
-extern character *player, *boss;
 extern QRectF borderOfCharacter;
-extern QList<QGraphicsItem*> *enemyList;
-extern QList<QGraphicsItem*> *enemyBulletList;
-extern QList<QGraphicsItem*> *myBulletList;
-extern QList<QGraphicsItem*> *missileList;
+extern QList<QGraphicsItem*> enemyList;
+extern QList<QGraphicsItem*> enemyBulletList;
+extern QList<QGraphicsItem*> myBulletList;
+extern QList<QGraphicsItem*> missileList;
+extern character *player, *boss;
 
 class character: public QObject, public QGraphicsPixmapItem
 {

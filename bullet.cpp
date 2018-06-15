@@ -21,20 +21,20 @@ bullet::bullet(const bullet &old):
 
 bullet::~bullet(){
 //    qDebug() << "bullet dtor";
-    if(static_cast<void*>(origin) == static_cast<void*>(player)){
-        auto index = std::find(myBulletList->begin(), myBulletList->end(), this);
-        if(index != myBulletList->end()){
+    if(origin == static_cast<QGraphicsItem*>(player)){
+        QList<QGraphicsItem*>::iterator index = std::find(myBulletList.begin(), myBulletList.end(), this);
+        if(index != myBulletList.end()){
             *index = nullptr;
-            return;
-        }
-        index = std::find(missileList->begin(), missileList->end(), this);
-        if(index != missileList->end()){
-            *index = nullptr;
-            return;
+        }else{
+            index = std::find(missileList.begin(), missileList.end(), this);
+            if(index != missileList.end()){
+                *index = nullptr;
+            }
         }
     }else{
-        auto index = std::find(enemyBulletList->begin(), enemyBulletList->end(), this);
-        *index = nullptr;
+        auto index = std::find(enemyBulletList.begin(), enemyBulletList.end(), this);
+        if(index != enemyBulletList.end())
+            *index = nullptr;
     }
 }
 
@@ -61,7 +61,6 @@ void bullet::setPolar(qreal r, qreal theta){
 void bullet::fly(){
     this->setPos(this->x() + r * qCos(theta), this->y() - r * qSin(theta));
     if(!borderOfBullet.contains(this->x(), this->y())){
-        this->scene()->removeItem(this);
         delete this;
     }
 }
@@ -86,7 +85,7 @@ void traceBullet::setTarget(QGraphicsItem *target){
 }
 
 void traceBullet::fly(){
-    if(!enemyList->contains(target)){
+    if(!enemyList.contains(target)){
         target = nullptr;
     }
     if(target != nullptr){
@@ -160,8 +159,8 @@ void missile::fly(){
         target = nullptr;
         if(boss != nullptr){
             target = static_cast<QGraphicsItem*>(boss);
-        }else if(enemyList->size() > 0){
-            target = enemyList->front();
+        }else if(enemyList.size() > 0){
+            target = enemyList.front();
         }
     }
     if(target != nullptr){

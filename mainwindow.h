@@ -24,10 +24,10 @@ class MainWindow;
 extern QFont mainFont;
 extern QRectF borderOfBullet;
 extern QRectF borderOfCharacter;
-extern QList<QGraphicsItem*> *enemyList;
-extern QList<QGraphicsItem*> *myBulletList;
-extern QList<QGraphicsItem*> *missileList;
-extern QList<QGraphicsItem*> *enemyBulletList;
+extern QList<QGraphicsItem*> enemyList;
+extern QList<QGraphicsItem*> myBulletList;
+extern QList<QGraphicsItem*> missileList;
+extern QList<QGraphicsItem*> enemyBulletList;
 extern QTimer *timer;
 extern character *boss, *player;
 

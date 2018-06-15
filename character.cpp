@@ -90,7 +90,7 @@ void gaben_reimu::attack(){
                 for(int i = 1; i >= -1; i -= 2){
                     for(double theta = 0; theta <= 2*M_PI; theta += 2*M_PI/50){
                         bullet *b = new bullet(bullets.at(0));
-                        enemyBulletList->insert(enemyBulletList->end(), b);
+                        enemyBulletList.insert(enemyBulletList.end(), b);
                         b->setZValue(10);
                         b->setPos(this->x() + this->boundingRect().width()/2 - b->boundingRect().width()/2 + 100 * cos(theta),
                                   this->y() + this->boundingRect().height()/2 - b->boundingRect().height()/2  - 100 * sin(theta));
@@ -105,7 +105,7 @@ void gaben_reimu::attack(){
                     double direction = qAtan2(dy, dx);
 //                    qDebug() << direction;
                     bullet *b = new bounceBullet(bullets.at(1));
-                    enemyBulletList->insert(enemyBulletList->end(), b);
+                    enemyBulletList.insert(enemyBulletList.end(), b);
                     b->setZValue(10);
                     b->setPos(this->x() + this->boundingRect().width()/2 - b->boundingRect().width()/2,
                               this->y() + this->boundingRect().height()/2 - b->boundingRect().height()/2 + 50);
@@ -127,7 +127,7 @@ void gaben_reimu::attack(){
         if(attackCooldown.elapsed() >= 3000){
             if((attackCounter += timer->interval()) % 600 < timer->interval()){
                 bullet *b = new bounceBullet(bullets.at(2));
-                enemyBulletList->insert(enemyBulletList->end(), b);
+                enemyBulletList.insert(enemyBulletList.end(), b);
                 b->setZValue(10);
                 b->setPos(this->x() + this->boundingRect().width()/2 - b->boundingRect().width()/2,
                           this->y() + this->boundingRect().height()/2 - b->boundingRect().height()/2 + 50);
@@ -137,7 +137,7 @@ void gaben_reimu::attack(){
             }
             if((attackCounter + 300) % 600 < timer->interval()){
                 bullet *b = new bounceBullet(bullets.at(3));
-                enemyBulletList->insert(enemyBulletList->end(), b);
+                enemyBulletList.insert(enemyBulletList.end(), b);
                 b->setZValue(10);
                 b->setPos(this->x() + this->boundingRect().width()/2 - b->boundingRect().width()/2,
                           this->y() + this->boundingRect().height()/2 - b->boundingRect().height()/2 + 50);
@@ -199,7 +199,7 @@ void wallet::attack(){
     if(attackCooldown.elapsed() >= 40){
         for(int i = 0; i <= 2; ++i){
             bullet *b = new bullet(bullets.at(i));
-            myBulletList->insert(myBulletList->end(), b);
+            myBulletList.insert(myBulletList.end(), b);
             b->setPos(this->x() + this->boundingRect().width() / 2 - b->boundingRect().width() / 2, this->y());
             this->scene()->addItem(b);
             connect(timer, &QTimer::timeout, b, &bullet::fly);
@@ -207,15 +207,15 @@ void wallet::attack(){
         if(++attackCounter > 3){
             for(int i = 3; i <= 4; ++i){
                 bullet *b = new traceBullet(bullets.at(i));
-                myBulletList->insert(myBulletList->end(), b);
+                myBulletList.insert(myBulletList.end(), b);
                 if(i == 3){
                     b->setPos(this->x() - 10 - b->boundingRect().width(), this->y() + (this->boundingRect().height() - b->boundingRect().height()) / 2);
                 }else{
                     b->setPos(this->x() + this->boundingRect().width() + 10, this->y() + (this->boundingRect().height() - b->boundingRect().height()) / 2);
                 }
                 this->scene()->addItem(b);
-                if(enemyList->size() > 0){
-                    dynamic_cast<traceBullet*>(b)->setTarget(enemyList->front());
+                if(enemyList.size() > 0){
+                    dynamic_cast<traceBullet*>(b)->setTarget(enemyList.front());
                 }
                 connect(timer, &QTimer::timeout, b, &bullet::fly);
             }
@@ -229,7 +229,7 @@ bool wallet::bigOneAttack(){
     if(spells > 0 && spellCooldown.elapsed() >= 4000){
         for(int i = 0; i < 5; ++i){
             bullet *b = new missile(missiles.at(qrand() % missiles.size()));
-            missileList->insert(missileList->end(), b);
+            missileList.insert(missileList.end(), b);
             b->setPos(this->x() + this->boundingRect().width() / 2 - b->boundingRect().width() / 2 + 50*cos(2*M_PI * (i / 5.0)),
                       this->y() + this->boundingRect().height() / 2 - b->boundingRect().height() / 2 + 50*sin(2*M_PI * (i / 5.0)));
             b->setDirection(7.5, 2*M_PI * (i / 5.0));
