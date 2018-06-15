@@ -21,7 +21,7 @@ bullet::bullet(const bullet &old):
 
 bullet::~bullet(){
 //    qDebug() << "bullet dtor";
-    if(origin == player){
+    if(static_cast<void*>(origin) == static_cast<void*>(player)){
         auto index = std::find(myBulletList->begin(), myBulletList->end(), this);
         if(index != myBulletList->end()){
             *index = nullptr;
@@ -159,7 +159,7 @@ void missile::fly(){
     }else{
         target = nullptr;
         if(boss != nullptr){
-            target = boss;
+            target = static_cast<QGraphicsItem*>(boss);
         }else if(enemyList->size() > 0){
             target = enemyList->front();
         }

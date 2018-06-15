@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent):
     ui->graphicsView->installEventFilter(this);
     timer->start(16);
     respawnTime->start();
+    qsrand(time(NULL));
     moveKeys.insert(Qt::Key_Up);
     moveKeys.insert(Qt::Key_Down);
     moveKeys.insert(Qt::Key_Left);
