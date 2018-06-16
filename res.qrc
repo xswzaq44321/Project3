@@ -41,4 +41,15 @@
         <file>res/Andy Bold.ttf</file>
         <file>res/HyliaSerifBeta-Regular.otf</file>
     </qresource>
+    <qresource prefix="/gameList">
+        <file>res/game_list/game1.png</file>
+        <file>res/game_list/game2.png</file>
+        <file>res/game_list/game3.png</file>
+        <file>res/game_list/game4.png</file>
+        <file>res/game_list/game5.png</file>
+        <file>res/game_list/game6.png</file>
+        <file>res/game_list/game7.png</file>
+        <file>res/game_list/game8.png</file>
+        <file>res/game_list/game_list.png</file>
+    </qresource>
 </RCC>

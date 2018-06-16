@@ -47,11 +47,11 @@ public:
 
 private slots:
     void moveHandler();
+    void attackHandler();
     void collidingDetect();
+    void infoBoardHandler();
     void playerExplode(QPointF center);
     void respawn();
-    void attackHandler();
-    void infoBoardHandler();
     void gameJudger();
 
 private:
@@ -61,15 +61,17 @@ private:
     QGraphicsRectItem *bossHealth;
     QGraphicsTextItem *scoreText;
     QGraphicsPixmapItem *life, *infoItem;
+    QGraphicsPixmapItem *backgroundItem[2];
     QGraphicsPixmapItem *shockWave = nullptr;
     QGraphicsPixmapItem *overItem, *winItem;
     QPixmap *lifeCanvas;
     QPainter *lifePainter;
     QTime *respawnTime;
     QTime *shockWaveTime;
+    QPointF sizeOfBackground;
     bool moving[4] = {0};
     int speed = 2;
-    qreal score = 0;
+    qreal score = 0, spend = 0, card = 0;
     bool attack = false, bigOne = false;
     bool playerIsDead = false;
     set<int> moveKeys;

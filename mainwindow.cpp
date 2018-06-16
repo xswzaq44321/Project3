@@ -83,7 +83,23 @@ void MainWindow::gameStart(){
     life->setPos(672, 100);
     scene->addItem(life);
 
-    boss = new gaben_reimu(300);
+    sizeOfBackground.setX(borderOfCharacter.width());
+    sizeOfBackground.setY((borderOfCharacter.width() / 1344.0) * 6760);
+    QPixmap backgroundCanvas(1344, 6760);
+    backgroundCanvas.fill(Qt::transparent);
+    QPainter backgroundPainter(&backgroundCanvas);
+    backgroundPainter.setOpacity(0.5);
+    backgroundPainter.drawPixmap(0, 0, QPixmap(":/gameList/res/game_list/game_list.png"));
+    backgroundItem[0] = new QGraphicsPixmapItem(backgroundCanvas.scaled(sizeOfBackground.x(), sizeOfBackground.y()));
+    backgroundItem[0]->setPos(0, -sizeOfBackground.y() + borderOfCharacter.height());
+    backgroundItem[0]->setZValue(-10);
+    scene->addItem(backgroundItem[0]);
+    backgroundItem[1] = new QGraphicsPixmapItem(backgroundCanvas.scaled(sizeOfBackground.x(), sizeOfBackground.y()));
+    backgroundItem[1]->setPos(0, -2*sizeOfBackground.y() + borderOfCharacter.height());
+    backgroundItem[1]->setZValue(-10);
+    scene->addItem(backgroundItem[1]);
+
+    boss = new gaben_reimu(3000);
     scene->addItem(boss);
     boss->setPosition((borderOfCharacter.width() - boss->boundingRect().width()) / 2, 0 + 40);
     bossHealth = scene->addRect(10, 10, borderOfCharacter.width() - 20, 10, QPen(QColor(0, 0, 0, 0)), QBrush(QColor(200, 0, 0)));
@@ -245,7 +261,8 @@ void MainWindow::collidingDetect(){
                 bool isDead = dynamic_cast<character*>(*jt)->hit(timer->interval() / 20.0);
                 if(isDead){
                     if(*jt == boss){ // if dead one is boss
-                        boss = NULL;
+                        boss = nullptr;
+                        connect(timer, SIGNAL(timeout()), this, SLOT(gameJudger()));
                     }
                     delete (*jt);
                     (*jt) = nullptr;
@@ -345,10 +362,26 @@ void MainWindow::gameJudger(){
 }
 
 void MainWindow::gameWin(){
+    static QGraphicsTextItem *totalScore, *totalSpend, *totalCard;
+    respawnTime->start();
+
     winItem = new QGraphicsPixmapItem(QPixmap(":/pics/res/GameWin.png").scaled(borderOfCharacter.width(), borderOfCharacter.height()));
     winItem->setPos(0, 0);
     winItem->setZValue(110);
     scene->addItem(winItem);
+    QFont clearingFont("Arial", 36);
+    totalScore = scene->addText(QString("你得到了:") + QString::number(score) + QString("分"), clearingFont);
+    totalScore->setDefaultTextColor(QColor(255, 255, 255));
+    totalScore->setPos(100, 250);
+    totalScore->setZValue(110);
+    totalSpend = scene->addText(QString("你撒了") + QString::number(spend) + QString("塊錢"), clearingFont);
+    totalSpend->setDefaultTextColor(QColor(255, 255, 255));
+    totalSpend->setPos(100, 350);
+    totalSpend->setZValue(110);
+    totalCard = scene->addText(QString("你刷爆了") + QString::number(card) + QString("張卡"), clearingFont);
+    totalCard->setDefaultTextColor(QColor(255, 255, 255));
+    totalCard->setPos(100, 450);
+    totalCard->setZValue(110);
 
     for(auto it = enemyBulletList.begin(); it != enemyBulletList.end(); ++it){
         delete (*it);
@@ -376,12 +409,14 @@ void MainWindow::attackHandler(){
     if(player != nullptr){
         if(!playerIsDead){
             if(attack){ // player attacks
-                player->attack();
+                spend += player->attack();
             }
             if(bigOne){
                 bool success = dynamic_cast<wallet*>(player)->bigOneAttack();
-                if(success)
+                if(success){
                     respawnTime->start();
+                    card += 5;
+                }
                 bigOne = false;
             }
         }else{
@@ -400,6 +435,14 @@ void MainWindow::infoBoardHandler(){
         char temp[100];
         sprintf(temp, "Score:%08d", (int)score);
         scoreText->setPlainText(QString::fromLocal8Bit(temp));
+
+        static int backIndex = 0;
+        if(backgroundItem[backIndex]->y() >= borderOfCharacter.height()){
+            backgroundItem[backIndex]->setPos(0, -2*sizeOfBackground.y() + borderOfCharacter.height());
+            backIndex = 1;
+        }
+        backgroundItem[0]->setPos(0, backgroundItem[0]->y() + timer->interval() / 10.0);
+        backgroundItem[1]->setPos(0, backgroundItem[1]->y() + timer->interval() / 10.0);
     }
     if(player != nullptr && (player->hp != playerLife || dynamic_cast<wallet*>(player)->spells != playerSpell)){
         if(player->hp > playerLife){

@@ -79,7 +79,7 @@ gaben_reimu::~gaben_reimu(){
     this->scene()->removeItem(this);
 }
 
-void gaben_reimu::attack(){
+int gaben_reimu::attack(){
     switch(phase){
     case 1:
         if(attackCooldown.elapsed() >= 3000){
@@ -148,6 +148,7 @@ void gaben_reimu::attack(){
         }
         break;
     }
+    return 0;
 }
 
 bool gaben_reimu::hit(qreal damage){
@@ -197,7 +198,8 @@ wallet::~wallet(){
     delete heart;
 }
 
-void wallet::attack(){
+int wallet::attack(){
+    int spend = 0;
     if(attackCooldown.elapsed() >= 40){
         for(int i = 0; i <= 2; ++i){
             bullet *b = new bullet(bullets.at(i));
@@ -205,6 +207,7 @@ void wallet::attack(){
             b->setPos(this->x() + this->boundingRect().width() / 2 - b->boundingRect().width() / 2, this->y());
             this->scene()->addItem(b);
             connect(timer, &QTimer::timeout, b, &bullet::fly);
+            spend += 10;
         }
         if(++attackCounter > 3){
             for(int i = 3; i <= 4; ++i){
@@ -220,11 +223,13 @@ void wallet::attack(){
                     dynamic_cast<traceBullet*>(b)->setTarget(enemyList.front());
                 }
                 connect(timer, &QTimer::timeout, b, &bullet::fly);
+                spend += 50;
             }
             attackCounter = 0;
         }
         attackCooldown.start();
     }
+    return spend;
 }
 
 bool wallet::bigOneAttack(){

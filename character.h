@@ -33,7 +33,7 @@ public:
     virtual void move(qreal vx, qreal vy);
     virtual void moveTo(qreal x, qreal y, qreal duration);
     virtual void setPosition(qreal x, qreal y);
-    virtual void attack() = 0;
+    virtual int attack() = 0;
     virtual bool hit(qreal damage = 1) = 0;
     bool isdead();
     qreal hp, initialHp;
@@ -49,7 +49,7 @@ class gaben_reimu: public character{
 public:
     gaben_reimu(int health = 1000);
     virtual ~gaben_reimu();
-    virtual void attack();
+    virtual int attack();
     virtual bool hit(qreal damage = 1);
 private:
     int attackCounter = 0;
@@ -60,7 +60,7 @@ class wallet: public character{
 public:
     wallet();
     virtual ~wallet();
-    virtual void attack();
+    virtual int attack();
     bool bigOneAttack();
     virtual bool hit(qreal damage = 1);
     virtual void setPosition(qreal x, qreal y);
