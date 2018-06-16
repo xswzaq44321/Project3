@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/enemy">
         <file>res/Gaben_Reimu.png</file>
+        <file>res/gabe_newell.png</file>
     </qresource>
     <qresource prefix="/bullets">
         <file>res/steam_logo.png</file>

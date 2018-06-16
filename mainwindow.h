@@ -59,7 +59,7 @@ private:
     QMetaObject::Connection explodeConnection;
     QGraphicsScene *scene;
     QGraphicsRectItem *bossHealth;
-    QGraphicsTextItem *scoreText;
+    QGraphicsTextItem *scoreText, *costText;
     QGraphicsPixmapItem *life, *infoItem;
     QGraphicsPixmapItem *backgroundItem[2];
     QGraphicsPixmapItem *shockWave = nullptr;

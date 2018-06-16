@@ -70,6 +70,10 @@ void MainWindow::gameStart(){
     scoreText->setDefaultTextColor(QColor(255, 255, 255));
     scoreText->setPos(672, 50);
     scoreText->setZValue(110);
+    costText = scene->addText("", scoreFont);
+    costText->setDefaultTextColor(QColor(255, 255, 255));
+    costText->setPos(672, 100);
+    costText->setZValue(110);
 
     lifeCanvas = new QPixmap(300, 100);
     lifeCanvas->fill(Qt::transparent);
@@ -80,7 +84,7 @@ void MainWindow::gameStart(){
     }
     life = new QGraphicsPixmapItem(*lifeCanvas);
     life->setZValue(110);
-    life->setPos(672, 100);
+    life->setPos(672, 200);
     scene->addItem(life);
 
     sizeOfBackground.setX(borderOfCharacter.width());
@@ -258,7 +262,7 @@ void MainWindow::collidingDetect(){
             if((it) == nullptr || (*jt) == nullptr) continue;
             if((it)->collidesWithItem(*jt)){
                 score += 1 * timer->interval()/10.0;
-                bool isDead = dynamic_cast<character*>(*jt)->hit(timer->interval() / 20.0);
+                bool isDead = dynamic_cast<character*>(*jt)->hit(timer->interval() / 25.0);
                 if(isDead){
                     if(*jt == boss){ // if dead one is boss
                         boss = nullptr;
@@ -284,6 +288,17 @@ void MainWindow::collidingDetect(){
                 delete (*it);
                 (*it) = nullptr;
             }
+        }
+    }
+
+    if(boss == nullptr){
+        for(auto it = enemyList.begin(); it != enemyList.end(); ++it){
+            delete (*it);
+            (*it) = nullptr;
+        }
+        for(auto it = enemyBulletList.begin(); it != enemyBulletList.end(); ++it){
+            delete (*it);
+            (*it) = nullptr;
         }
     }
 
@@ -382,14 +397,6 @@ void MainWindow::gameWin(){
     totalCard->setDefaultTextColor(QColor(255, 255, 255));
     totalCard->setPos(100, 450);
     totalCard->setZValue(110);
-
-    for(auto it = enemyBulletList.begin(); it != enemyBulletList.end(); ++it){
-        delete (*it);
-        (*it) = nullptr;
-    }
-    for(int i = 0; i < enemyBulletList.count(nullptr); ++i){
-        enemyBulletList.removeOne(nullptr);
-    }
 }
 
 void MainWindow::gameOver(){
@@ -423,8 +430,12 @@ void MainWindow::attackHandler(){
             bigOne = false;
         }
     }
-    if(boss != NULL && respawnTime->elapsed() > 2000){
-        boss->attack();
+    if(respawnTime->elapsed() > 2000){
+        for(auto it:enemyList){
+            if(it != nullptr){
+                dynamic_cast<character*>(it)->attack();
+            }
+        }
     }
 }
 
@@ -435,6 +446,8 @@ void MainWindow::infoBoardHandler(){
         char temp[100];
         sprintf(temp, "Score:%08d", (int)score);
         scoreText->setPlainText(QString::fromLocal8Bit(temp));
+        sprintf(temp, "Cost:%08d", (int)spend);
+        costText->setPlainText(QString::fromLocal8Bit(temp));
 
         static int backIndex = 0;
         if(backgroundItem[backIndex]->y() >= borderOfCharacter.height()){

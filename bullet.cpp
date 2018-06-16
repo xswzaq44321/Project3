@@ -48,6 +48,8 @@ bullet& bullet::operator =(const bullet& R){
 }
 
 void bullet::setDirection(qreal r, qreal theta){
+    for(; theta > M_PI; theta -= 2*M_PI);
+    for(; theta < -M_PI; theta += 2*M_PI);
     r *= timer->interval() / 10.0;
     this->r = r;
     this->theta = theta;
@@ -121,8 +123,10 @@ bounceBullet::bounceBullet(const bullet &old):
 
 void bounceBullet::fly(){
     this->setPos(this->x() + r * qCos(theta), this->y() - r * qSin(theta));
-    if(this->x() < 0 || this->x() > (borderOfCharacter.width() - this->boundingRect().width())){
-        theta = theta - 2*(M_PI_2 - fabs(theta));
+    if(fabs(theta) > qDegreesToRadians((double)10) && fabs(theta) < qDegreesToRadians((double)170)){
+        if(this->x() < 0 || this->x() > (borderOfCharacter.width() - this->boundingRect().width())){
+            theta = theta - 2*(M_PI_2 - fabs(theta));
+        }
     }
     if(!borderOfBullet.contains(this->x(), this->y())){
         this->scene()->removeItem(this);
@@ -175,5 +179,48 @@ void missile::fly(){
     if(liveTime.elapsed() > 4000){
         this->scene()->removeItem(this);
         delete this;
+    }
+}
+
+aimBullet::aimBullet():
+    bullet()
+{
+    liveTime.start();
+    theta = 0;
+    this->setTransformOriginPoint(this->boundingRect().width()/2, this->boundingRect().height()/2);
+}
+
+aimBullet::aimBullet(const QString &filename, QPointF polar, QPointF picSize, QGraphicsItem *who):
+    bullet(filename, polar, picSize, who)
+{
+    liveTime.start();
+    theta = 0;
+    this->setTransformOriginPoint(this->boundingRect().width()/2, this->boundingRect().height()/2);
+}
+
+aimBullet::aimBullet(const bullet &old):
+    bullet(old)
+{
+    liveTime.start();
+    this->setTransformOriginPoint(this->boundingRect().width()/2, this->boundingRect().height()/2);
+}
+
+void aimBullet::setTarget(QGraphicsItem *target){
+    this->target = target;
+}
+
+void aimBullet::fly(){
+    if(liveTime.elapsed() < 1000){
+        if(target != nullptr){
+            double dx =(target->x() + target->boundingRect().width() / 2) - (this->x() + this->boundingRect().width() / 2);
+            double dy =(this->y() + this->boundingRect().height() / 2) - (target->y() + target->boundingRect().height() / 2);
+            double direction = qAtan2(dy, dx);
+            double error = direction - theta;
+            if(error > M_PI) error -= 2*M_PI;
+            this->setPolar(r, theta + error);
+            this->setRotation(qRadiansToDegrees(-(theta + error)));
+        }
+    }else{
+        this->setPos(this->x() + r * qCos(theta), this->y() - r * qSin(theta));
     }
 }

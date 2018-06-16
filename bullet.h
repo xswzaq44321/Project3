@@ -51,7 +51,7 @@ class traceBullet: public bullet
 
 public:
     traceBullet();
-    traceBullet(const QString &filename, QPointF polar, QPointF picSize, QGraphicsItem *who);
+    traceBullet(const QString &filename, QPointF polar, QPointF picSize, QGraphicsItem *who = nullptr);
     traceBullet(const bullet &old);
     void setTarget(QGraphicsItem *target);
 public slots:
@@ -66,7 +66,7 @@ class bounceBullet: public bullet
 
 public:
     bounceBullet();
-    bounceBullet(const QString &filename, QPointF polar, QPointF picSize, QGraphicsItem *who);
+    bounceBullet(const QString &filename, QPointF polar, QPointF picSize, QGraphicsItem *who = nullptr);
     bounceBullet(const bullet &old);
 public slots:
     virtual void fly();
@@ -78,8 +78,23 @@ class missile: public bullet
 
 public:
     missile();
-    missile(const QString &filename, QPointF polar, QPointF picSize, QGraphicsItem *who);
+    missile(const QString &filename, QPointF polar, QPointF picSize, QGraphicsItem *who = nullptr);
     missile(const bullet &old);
+    void setTarget(QGraphicsItem *target);
+public slots:
+    virtual void fly();
+private:
+    QGraphicsItem *target;
+    QTime liveTime;
+};
+
+class aimBullet : public bullet
+{
+    Q_OBJECT
+public:
+    aimBullet();
+    aimBullet(const QString &filename, QPointF polar, QPointF picSize, QGraphicsItem *who = nullptr);
+    aimBullet(const bullet &old);
     void setTarget(QGraphicsItem *target);
 public slots:
     virtual void fly();

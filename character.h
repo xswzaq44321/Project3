@@ -15,6 +15,7 @@
 
 class bullet;
 class character;
+class gaben;
 extern QRectF borderOfCharacter;
 extern QList<QGraphicsItem*> enemyList;
 extern QList<QGraphicsItem*> enemyBulletList;
@@ -30,8 +31,8 @@ public:
     character();
     character(const QString &filename, int hp_init = 1000);
     virtual ~character();
-    virtual void move(qreal vx, qreal vy);
-    virtual void moveTo(qreal x, qreal y, qreal duration);
+    void move(qreal vx, qreal vy, bool ignore = false);
+    void moveTo(qreal x, qreal y, qreal duration, bool ignore = false);
     virtual void setPosition(qreal x, qreal y);
     virtual int attack() = 0;
     virtual bool hit(qreal damage = 1) = 0;
@@ -43,6 +44,8 @@ public:
     QTime attackCooldown;
     QTime spellCooldown;
     QList<bullet> bullets;
+protected:
+    int attackCounter = 0;
 };
 
 class gaben_reimu: public character{
@@ -52,8 +55,16 @@ public:
     virtual int attack();
     virtual bool hit(qreal damage = 1);
 private:
-    int attackCounter = 0;
     int phase = 1;
+    character *minion = nullptr;
+};
+
+class gaben: public character{
+public:
+    gaben(int health = 500);
+    virtual ~gaben();
+    virtual int attack();
+    virtual bool hit(qreal damage = 1);
 };
 
 class wallet: public character{
@@ -67,8 +78,6 @@ public:
     QGraphicsPixmapItem *heart;
     QList<bullet> missiles;
     int spells = 3;
-private:
-    int attackCounter = 0;
 };
 
 #endif // CHARACTER_H
