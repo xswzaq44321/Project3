@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/enemy">
         <file>res/Gaben_Reimu.png</file>
+        <file>res/gabe_newell.png</file>
     </qresource>
     <qresource prefix="/bullets">
         <file>res/steam_logo.png</file>
@@ -8,9 +9,48 @@
         <file>res/66%.png</file>
         <file>res/75%.png</file>
         <file>res/90%.png</file>
+        <file>res/USD/1_cent.png</file>
+        <file>res/USD/5_cent.png</file>
+        <file>res/USD/10_cent.png</file>
+        <file>res/USD/25_cent.png</file>
+        <file>res/USD/50_cent.png</file>
+        <file>res/NTD/1_dollor.png</file>
+        <file>res/NTD/5_dollor.png</file>
+        <file>res/NTD/10_dollor.png</file>
+        <file>res/NTD/20_dollor.png</file>
+        <file>res/NTD/50_dollor.png</file>
+        <file>res/card/citi.png</file>
+        <file>res/card/master.png</file>
+        <file>res/card/standard.png</file>
+        <file>res/card/visa.png</file>
     </qresource>
     <qresource prefix="/player">
         <file>res/Savings.png</file>
         <file>res/heart.png</file>
+    </qresource>
+    <qresource prefix="/pics">
+        <file>res/info_board_background.png</file>
+        <file>res/GameOver.png</file>
+        <file>res/error.png</file>
+        <file>res/GameWin.png</file>
+    </qresource>
+    <qresource prefix="/audio">
+        <file>res/Thanks and Have Fun, Gabe Newell.mp3</file>
+        <file>res/GabeN_song.mp3</file>
+    </qresource>
+    <qresource prefix="/font">
+        <file>res/Andy Bold.ttf</file>
+        <file>res/HyliaSerifBeta-Regular.otf</file>
+    </qresource>
+    <qresource prefix="/gameList">
+        <file>res/game_list/game1.png</file>
+        <file>res/game_list/game2.png</file>
+        <file>res/game_list/game3.png</file>
+        <file>res/game_list/game4.png</file>
+        <file>res/game_list/game5.png</file>
+        <file>res/game_list/game6.png</file>
+        <file>res/game_list/game7.png</file>
+        <file>res/game_list/game8.png</file>
+        <file>res/game_list/game_list.png</file>
     </qresource>
 </RCC>
