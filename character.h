@@ -34,9 +34,9 @@ public:
     virtual void moveTo(qreal x, qreal y, qreal duration);
     virtual void setPosition(qreal x, qreal y);
     virtual void attack() = 0;
-    virtual bool hit() = 0;
+    virtual bool hit(qreal damage = 1) = 0;
     bool isdead();
-    int hp, initialHp;
+    qreal hp, initialHp;
     QRectF border;
     QTimer moveTimer;
     QTime moveClock;
@@ -50,7 +50,7 @@ public:
     gaben_reimu(int health = 1000);
     virtual ~gaben_reimu();
     virtual void attack();
-    virtual bool hit();
+    virtual bool hit(qreal damage = 1);
 private:
     int attackCounter = 0;
     int phase = 1;
@@ -62,7 +62,7 @@ public:
     virtual ~wallet();
     virtual void attack();
     bool bigOneAttack();
-    virtual bool hit();
+    virtual bool hit(qreal damage = 1);
     virtual void setPosition(qreal x, qreal y);
     QGraphicsPixmapItem *heart;
     QList<bullet> missiles;

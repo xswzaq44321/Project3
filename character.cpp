@@ -9,7 +9,7 @@ character::character():
 }
 
 character::character(const QString &filename, int hp_init):
-    QGraphicsPixmapItem(QPixmap(filename).scaled(64, 88)),
+    QGraphicsPixmapItem(QPixmap(filename).scaled(64, 88, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)),
     hp(hp_init),
     initialHp(hp_init)
 {
@@ -150,17 +150,19 @@ void gaben_reimu::attack(){
     }
 }
 
-bool gaben_reimu::hit(){
-    --hp;
+bool gaben_reimu::hit(qreal damage){
+    hp -= damage;
 //    qDebug() << "ouch! " << hp;
-    if(hp == initialHp * 2 / 3){
+
+    if(phase == 1 && hp <= initialHp * 2 / 3){
         phase = 2;
         this->moveTo((borderOfCharacter.width() - this->boundingRect().width()) / 2, 0 + 40, 500);
         attackCooldown.start();
-    }else if(hp == initialHp / 3){
+    }else if(phase == 2 && hp <= initialHp / 3){
         phase = 3;
         attackCooldown.start();
     }
+
     if(hp <= 0){
         return true;
     }
@@ -169,7 +171,7 @@ bool gaben_reimu::hit(){
 
 wallet::wallet():
     character(":/player/res/Savings.png", 3),
-    heart(new QGraphicsPixmapItem(QPixmap(":/player/res/heart.png").scaled(8, 8)))
+    heart(new QGraphicsPixmapItem(QPixmap(":/player/res/heart.png").scaled(8, 8, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)))
 {
     this->border.setCoords(-(this->boundingRect().width() - this->heart->boundingRect().width()) / 2,
                            -(this->boundingRect().height() - this->heart->boundingRect().height()) / 2,
@@ -232,7 +234,7 @@ bool wallet::bigOneAttack(){
             missileList.insert(missileList.end(), b);
             b->setPos(this->x() + this->boundingRect().width() / 2 - b->boundingRect().width() / 2 + 50*cos(2*M_PI * (i / 5.0)),
                       this->y() + this->boundingRect().height() / 2 - b->boundingRect().height() / 2 + 50*sin(2*M_PI * (i / 5.0)));
-            b->setDirection(7.5, 2*M_PI * (i / 5.0));
+            b->setDirection(7.5, qDegreesToRadians((double)(qrand() % 361 - 180)));
             this->scene()->addItem(b);
             connect(timer, &QTimer::timeout, b, &bullet::fly);
         }
@@ -249,8 +251,8 @@ void wallet::setPosition(qreal x, qreal y){
                         y + (this->boundingRect().height() - this->heart->boundingRect().height()) / 2);
 }
 
-bool wallet::hit(){
-    --hp;
+bool wallet::hit(qreal damage){
+    hp -= damage;
     qDebug() << "player hp = " << hp;
     if(hp == 0){
         return true;

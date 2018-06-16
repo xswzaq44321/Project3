@@ -1,7 +1,7 @@
 #include "bullet.h"
 
 bullet::bullet(const QString &filename, QPointF polar, QPointF picSize, QGraphicsItem *who):
-    QGraphicsPixmapItem(QPixmap(filename).scaled(picSize.x(), picSize.y())),
+    QGraphicsPixmapItem(QPixmap(filename).scaled(picSize.x(), picSize.y(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation)),
     origin(who),
     r(polar.x() * timer->interval() / 10.0),
     theta(polar.y())
@@ -94,7 +94,7 @@ void traceBullet::fly(){
         double direction = qAtan2(dy, dx);
         double error = direction - theta;
         if(error > M_PI) error -= 2*M_PI;
-        this->setPolar(r, theta + (error) / 1);
+        this->setPolar(r, theta + error);
 //        qDebug() << direction;
     }
     this->setPos(this->x() + r * qCos(theta), this->y() - r * qSin(theta));
@@ -169,7 +169,7 @@ void missile::fly(){
         double direction = qAtan2(dy, dx);
         double error = direction - theta;
         if(error > M_PI) error -= 2*M_PI;
-        this->setPolar(r, theta + (error) / 5);
+        this->setPolar(r, theta + error / (8*10.0/timer->interval()));
     }
     this->setPos(this->x() + r * qCos(theta), this->y() - r * qSin(theta));
     if(liveTime.elapsed() > 4000){

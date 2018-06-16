@@ -42,26 +42,34 @@ public:
     virtual void keyPressEvent(QKeyEvent *e);
     virtual void keyReleaseEvent(QKeyEvent *e);
     void gameStart();
+    void gameWin();
+    void gameOver();
 
 private slots:
     void moveHandler();
-    bool collidingDetect();
+    void collidingDetect();
+    void playerExplode(QPointF center);
     void respawn();
     void attackHandler();
     void infoBoardHandler();
+    void gameJudger();
 
 private:
     Ui::MainWindow *ui;
+    QMetaObject::Connection explodeConnection;
     QGraphicsScene *scene;
     QGraphicsRectItem *bossHealth;
     QGraphicsTextItem *scoreText;
     QGraphicsPixmapItem *life, *infoItem;
+    QGraphicsPixmapItem *shockWave = nullptr;
+    QGraphicsPixmapItem *overItem, *winItem;
     QPixmap *lifeCanvas;
     QPainter *lifePainter;
     QTime *respawnTime;
+    QTime *shockWaveTime;
     bool moving[4] = {0};
     int speed = 2;
-    int score = 0;
+    qreal score = 0;
     bool attack = false, bigOne = false;
     bool playerIsDead = false;
     set<int> moveKeys;

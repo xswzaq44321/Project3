@@ -31,6 +31,7 @@
         <file>res/info_board_background.png</file>
         <file>res/GameOver.png</file>
         <file>res/error.png</file>
+        <file>res/GameWin.png</file>
     </qresource>
     <qresource prefix="/audio">
         <file>res/Thanks and Have Fun, Gabe Newell.mp3</file>
