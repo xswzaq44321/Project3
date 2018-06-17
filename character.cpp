@@ -64,14 +64,14 @@ void character::setPosition(qreal x, qreal y){
 }
 
 gaben_reimu::gaben_reimu(int health):
-    character(":/enemy/res/Gaben_Reimu.png", health)
+    character(":/enemy/gaben_reimu", health)
 {
     this->setZValue(20);
-    bullets.insert(bullets.end(), bullet(":/bullets/res/steam_logo.png", QPointF(0, 0), QPointF(15, 15)));
-    bullets.insert(bullets.end(), bullet(":/bullets/res/50%.png", QPointF(0, 0), QPointF(40, 20)));
-    bullets.insert(bullets.end(), bullet(":/bullets/res/66%.png", QPointF(0, 0), QPointF(48, 24)));
-    bullets.insert(bullets.end(), bullet(":/bullets/res/75%.png", QPointF(0, 0), QPointF(56, 28)));
-    bullets.insert(bullets.end(), bullet(":/bullets/res/90%.png", QPointF(0, 0), QPointF(64, 32)));
+    bullets.insert(bullets.end(), bullet(":/bullets/steam_logo", QPointF(0, 0), QPointF(15, 15)));
+    bullets.insert(bullets.end(), bullet(":/bullets/50%", QPointF(0, 0), QPointF(40, 20)));
+    bullets.insert(bullets.end(), bullet(":/bullets/66%", QPointF(0, 0), QPointF(48, 24)));
+    bullets.insert(bullets.end(), bullet(":/bullets/75%", QPointF(0, 0), QPointF(56, 28)));
+    bullets.insert(bullets.end(), bullet(":/bullets/90%", QPointF(0, 0), QPointF(64, 32)));
 }
 
 gaben_reimu::~gaben_reimu(){
@@ -99,11 +99,11 @@ int gaben_reimu::attack(){
                         connect(timer, &QTimer::timeout, b, &bullet::fly);
                     }
                 }
-                {
-                    double dx =(player->x() + player->boundingRect().width() / 2) - (this->x() + this->boundingRect().width() / 2);
-                    double dy =(this->y() + this->boundingRect().height() / 2) - (player->y() + player->boundingRect().height() / 2);
-                    double direction = qAtan2(dy, dx);
-//                    qDebug() << direction;
+                double dx =(player->x() + player->boundingRect().width() / 2) - (this->x() + this->boundingRect().width() / 2);
+                double dy =(this->y() + this->boundingRect().height() / 2) - (player->y() + player->boundingRect().height() / 2);
+                double direction = qAtan2(dy, dx);
+//                qDebug() << direction;
+                for(int i = 0; i < 3; ++i){
                     bullet *b = new bounceBullet(bullets.at(1));
                     enemyBulletList.insert(enemyBulletList.end(), b);
                     b->setZValue(10);
@@ -125,7 +125,7 @@ int gaben_reimu::attack(){
             this->moveTo((borderOfCharacter.width() - this->boundingRect().width()) / 2 + (qrand() % 3 - 1)*150, 40 + (qrand()%3) * 30, 1000);
         }
         if(attackCooldown.elapsed() >= 3000){
-            if((attackCounter += timer->interval()) % 600 < timer->interval()){
+            if((attackCounter += timer->interval()) % 400 < timer->interval()){
                 double dx =(player->x() + player->boundingRect().width() / 2) - (this->x() + this->boundingRect().width() / 2);
                 double dy =(this->y() + this->boundingRect().height() / 2) - (player->y() + player->boundingRect().height() / 2);
                 double direction = qAtan2(dy, dx);
@@ -138,7 +138,7 @@ int gaben_reimu::attack(){
                 this->scene()->addItem(b);
                 connect(timer, &QTimer::timeout, b, &bullet::fly);
             }
-            if((attackCounter + 300) % 600 < timer->interval()){
+            if((attackCounter + 200) % 400 < timer->interval()){
                 double dx =(player->x() + player->boundingRect().width() / 2) - (this->x() + this->boundingRect().width() / 2);
                 double dy =(this->y() + this->boundingRect().height() / 2) - (player->y() + player->boundingRect().height() / 2);
                 double direction = qAtan2(dy, dx);
@@ -167,16 +167,18 @@ int gaben_reimu::attack(){
                 }
             }
             if((attackCounter += timer->interval()) % 600 < timer->interval()){
-                qreal theta = qDegreesToRadians((double)(qrand() % 359 - 179));
-                bullet *b = new aimBullet(bullets.at(qrand() % 4 + 1));
-                enemyBulletList.insert(enemyBulletList.end(), b);
-                b->setZValue(10);
-                b->setPos(this->x() + this->boundingRect().width()/2 - b->boundingRect().width()/2 + 100*cos(theta),
-                          this->y() + this->boundingRect().height()/2 - b->boundingRect().height()/2 + 100*sin(theta));
-                b->setDirection(1.5, 0);
-                dynamic_cast<aimBullet*>(b)->setTarget(player);
-                this->scene()->addItem(b);
-                connect(timer, &QTimer::timeout, b, &bullet::fly);
+                for(int i = 0; i < 2; i += enemyList.count()){
+                    qreal theta = qDegreesToRadians((double)(qrand() % 359 - 179));
+                    bullet *b = new aimBullet(bullets.at(qrand() % 4 + 1));
+                    enemyBulletList.insert(enemyBulletList.end(), b);
+                    b->setZValue(10);
+                    b->setPos(this->x() + this->boundingRect().width()/2 - b->boundingRect().width()/2 + 100*cos(theta),
+                              this->y() + this->boundingRect().height()/2 - b->boundingRect().height()/2 + 100*sin(theta));
+                    b->setDirection(1.5, 0);
+                    dynamic_cast<aimBullet*>(b)->setTarget(player);
+                    this->scene()->addItem(b);
+                    connect(timer, &QTimer::timeout, b, &bullet::fly);
+                }
             }
             if(enemyList.size() == 1 && attackCounter % 16 < timer->interval()){
                 qreal s, a, b, m, n, r_1, r_2;
@@ -218,7 +220,7 @@ bool gaben_reimu::hit(qreal damage){
         this->moveTo((borderOfCharacter.width() - this->boundingRect().width()) / 3, 0 + 40, 500);
         attackCooldown.start();
 
-        minion = new gaben(500);
+        minion = new gaben(this->hp / 2);
         this->scene()->addItem(minion);
         minion->setPosition((borderOfCharacter.width() - this->boundingRect().width()) / 3 * 2, 0 - minion->boundingRect().height());
         minion->moveTo(minion->x(), 40, 2000, true);
@@ -231,11 +233,11 @@ bool gaben_reimu::hit(qreal damage){
 }
 
 gaben::gaben(int health):
-    character(":/enemy/res/gabe_newell.png", health)
+    character(":/enemy/gaben_newell", health)
 {
     this->setZValue(20);
-    bullets.insert(bullets.end(), bullet(":/bullets/res/steam_logo.png", QPointF(0, 0), QPointF(15, 15)));
-    bullets.insert(bullets.end(), bullet(":/bullets/res/90%.png", QPointF(0, 0), QPointF(64, 32)));
+    bullets.insert(bullets.end(), bullet(":/bullets/steam_logo", QPointF(0, 0), QPointF(15, 15)));
+    bullets.insert(bullets.end(), bullet(":/bullets/90%", QPointF(0, 0), QPointF(64, 32)));
 }
 
 gaben::~gaben()
@@ -286,8 +288,8 @@ bool gaben::hit(qreal damage){
 }
 
 wallet::wallet():
-    character(":/player/res/Savings.png", 3),
-    heart(new QGraphicsPixmapItem(QPixmap(":/player/res/heart.png").scaled(8, 8, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)))
+    character(":/player/savings", 3),
+    heart(new QGraphicsPixmapItem(QPixmap(":/player/heart").scaled(8, 8, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)))
 {
     this->border.setCoords(-(this->boundingRect().width() - this->heart->boundingRect().width()) / 2,
                            -(this->boundingRect().height() - this->heart->boundingRect().height()) / 2,
@@ -295,15 +297,15 @@ wallet::wallet():
                            borderOfCharacter.height() - (this->boundingRect().height() + this->heart->boundingRect().height()) / 2);
     this->setZValue(0);
     this->heart->setZValue(30);
-    bullets.insert(bullets.end(), bullet(":/bullets/res/NTD/10_dollor.png", QPointF(10, M_PI_2), QPointF(30, 30), this));
-    bullets.insert(bullets.end(), bullet(":/bullets/res/NTD/10_dollor.png", QPointF(10, M_PI_2 + 0.09), QPointF(30, 30), this));
-    bullets.insert(bullets.end(), bullet(":/bullets/res/NTD/10_dollor.png", QPointF(10, M_PI_2 - 0.09), QPointF(30, 30), this));
-    bullets.insert(bullets.end(), bullet(":/bullets/res/NTD/50_dollor.png", QPointF(10, M_PI_2 - 0.18), QPointF(30, 30), this));
-    bullets.insert(bullets.end(), bullet(":/bullets/res/NTD/50_dollor.png", QPointF(10, M_PI_2 + 0.18), QPointF(30, 30), this));
-    missiles.insert(missiles.end(), bullet(":/bullets/res/card/citi.png", QPointF(7.5, 0), QPointF(80, 50), this));
-    missiles.insert(missiles.end(), bullet(":/bullets/res/card/master.png", QPointF(7.5, 0), QPointF(80, 50), this));
-    missiles.insert(missiles.end(), bullet(":/bullets/res/card/standard.png", QPointF(7.5, 0), QPointF(80, 50), this));
-    missiles.insert(missiles.end(), bullet(":/bullets/res/card/visa.png", QPointF(7.5, 0), QPointF(80, 50), this));
+    bullets.insert(bullets.end(), bullet(":/bullets/10_dollor", QPointF(10, M_PI_2), QPointF(30, 30), this));
+    bullets.insert(bullets.end(), bullet(":/bullets/10_dollor", QPointF(10, M_PI_2 + 0.09), QPointF(30, 30), this));
+    bullets.insert(bullets.end(), bullet(":/bullets/10_dollor", QPointF(10, M_PI_2 - 0.09), QPointF(30, 30), this));
+    bullets.insert(bullets.end(), bullet(":/bullets/50_dollor", QPointF(10, M_PI_2 - 0.18), QPointF(30, 30), this));
+    bullets.insert(bullets.end(), bullet(":/bullets/50_dollor", QPointF(10, M_PI_2 + 0.18), QPointF(30, 30), this));
+    missiles.insert(missiles.end(), bullet(":/bullets/citi_card", QPointF(7.5, 0), QPointF(80, 50), this));
+    missiles.insert(missiles.end(), bullet(":/bullets/master_card", QPointF(7.5, 0), QPointF(80, 50), this));
+    missiles.insert(missiles.end(), bullet(":/bullets/standard_card", QPointF(7.5, 0), QPointF(80, 50), this));
+    missiles.insert(missiles.end(), bullet(":/bullets/visa_card", QPointF(7.5, 0), QPointF(80, 50), this));
 }
 
 wallet::~wallet(){

@@ -70,7 +70,7 @@ private:
     QTime *shockWaveTime;
     QPointF sizeOfBackground;
     bool moving[4] = {0};
-    int speed = 2;
+    int speed = 2.5;
     qreal score = 0, spend = 0, card = 0;
     bool attack = false, bigOne = false;
     bool playerIsDead = false;
