@@ -180,7 +180,7 @@ void MainWindow::keyReleaseEvent(QKeyEvent *e){
     }else if(functionKeys.count(e->key())){
         switch(e->key()){
         case Qt::Key_Shift:
-            speed = 2;
+            speed = SPEED;
             break;
         case Qt::Key_Z:
             attack = false;
@@ -495,7 +495,7 @@ void MainWindow::infoBoardHandler(){
             hp = (((int)boss->hp)%(int)(boss->initialHp/3)) / (boss->initialHp/3);
         }
         qDebug() << hp;
-        if(displayWidth < (borderOfCharacter.width() - 20)*(hp) - 5){
+        if(displayWidth < (borderOfCharacter.width() - 20)*(hp) - 1){
             displayWidth += (borderOfCharacter.width() - 20)*(hp)/100 * timer->interval() / 10.0;
         }else{
             displayWidth = (borderOfCharacter.width() - 20)*(hp);

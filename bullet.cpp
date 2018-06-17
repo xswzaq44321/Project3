@@ -56,6 +56,8 @@ void bullet::setDirection(qreal r, qreal theta){
 }
 
 void bullet::setPolar(qreal r, qreal theta){
+    for(; theta > M_PI; theta -= 2*M_PI);
+    for(; theta < -M_PI; theta += 2*M_PI);
     this->r = r;
     this->theta = theta;
 }

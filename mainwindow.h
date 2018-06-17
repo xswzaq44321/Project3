@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#define SPEED 3
+
 #include <QMainWindow>
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
@@ -70,7 +72,7 @@ private:
     QTime *shockWaveTime;
     QPointF sizeOfBackground;
     bool moving[4] = {0};
-    int speed = 2.5;
+    int speed = SPEED;
     qreal score = 0, spend = 0, card = 0;
     bool attack = false, bigOne = false;
     bool playerIsDead = false;
