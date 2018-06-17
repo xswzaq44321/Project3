@@ -448,11 +448,8 @@ void MainWindow::infoBoardHandler(){
     static int playerLife = 3;
     static int playerSpell = 3;
     {
-        char temp[100];
-        sprintf(temp, "Score:%08d", (int)score);
-        scoreText->setPlainText(QString::fromLocal8Bit(temp));
-        sprintf(temp, "Cost:%08d", (int)spend);
-        costText->setPlainText(QString::fromLocal8Bit(temp));
+        scoreText->setPlainText(QString().sprintf("Score:%08d", (int)score));
+        costText->setPlainText(QString().sprintf("Cost:%08d", (int)spend));
 
         if(backgroundItem[0]->y() >= borderOfCharacter.height()){
             backgroundItem[0]->setPos(0, backgroundItem[1]->y() - sizeOfBackground.y() + 1);
@@ -490,6 +487,6 @@ void MainWindow::infoBoardHandler(){
         life->setPixmap(*lifeCanvas);
     }
     if(boss != nullptr){
-        bossHealth->setRect(10, 10, (borderOfCharacter.width() - 20)*((float)boss->hp / boss->initialHp), 10);
+        bossHealth->setRect(10, 10, (borderOfCharacter.width() - 20)*(boss->hp / boss->initialHp), 10);
     }
 }
