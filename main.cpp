@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     font.addApplicationFont(":/font/Arial Bold");
     MainWindow w;
     w.setWindowTitle("Touhou Big Sale");
-    w.setWindowIcon(QIcon(":/enemy/Gaben_Reimu"));
+    w.setWindowIcon(QIcon(":/enemy/gaben_reimu"));
     w.show();
 
     return a.exec();
