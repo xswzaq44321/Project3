@@ -54,8 +54,8 @@ public:
     virtual ~gaben_reimu();
     virtual int attack();
     virtual bool hit(qreal damage = 1);
-private:
     int phase = 1;
+private:
     character *minion = nullptr;
 };
 
