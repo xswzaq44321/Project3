@@ -106,9 +106,9 @@ void MainWindow::gameStart(){
     boss = new gaben_reimu(6000);
     scene->addItem(boss);
     boss->setPosition((borderOfCharacter.width() - boss->boundingRect().width()) / 2, 0 + 40);
-    bossHealth = scene->addRect(10, 10, borderOfCharacter.width() - 20, 10, QPen(QColor(0, 0, 0, 0)), QBrush(QColor(200, 0, 0)));
-    bossHealth->setZValue(0);
     enemyList.insert(enemyList.end(), boss);
+    bossHealth = scene->addRect(10, 10, 0, 10, QPen(QColor(0, 0, 0, 0)), QBrush(QColor(200, 0, 0)));
+    bossHealth->setZValue(0);
 
     player = new wallet;
     scene->addItem(player);
@@ -487,6 +487,19 @@ void MainWindow::infoBoardHandler(){
         life->setPixmap(*lifeCanvas);
     }
     if(boss != nullptr){
-        bossHealth->setRect(10, 10, (borderOfCharacter.width() - 20)*(boss->hp / boss->initialHp), 10);
+        static qreal displayWidth = 0;
+        qreal hp; // hp percentage
+        if((((int)boss->hp)%(int)(boss->initialHp/3)) == 0 && boss->hp != 0){
+            hp = 1;
+        }else{
+            hp = (((int)boss->hp)%(int)(boss->initialHp/3)) / (boss->initialHp/3);
+        }
+        qDebug() << hp;
+        if(displayWidth < (borderOfCharacter.width() - 20)*(hp) - 5){
+            displayWidth += (borderOfCharacter.width() - 20)*(hp)/100 * timer->interval() / 10.0;
+        }else{
+            displayWidth = (borderOfCharacter.width() - 20)*(hp);
+        }
+        bossHealth->setRect(10, 10, displayWidth, 10);
     }
 }
