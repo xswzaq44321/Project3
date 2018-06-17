@@ -68,7 +68,7 @@ void bullet::fly(){
 }
 
 traceBullet::traceBullet():
-    bullet(":/pics/res/error.png")
+    bullet()
 {
 }
 
@@ -123,7 +123,7 @@ bounceBullet::bounceBullet(const bullet &old):
 
 void bounceBullet::fly(){
     this->setPos(this->x() + r * qCos(theta), this->y() - r * qSin(theta));
-    if(fabs(theta) > qDegreesToRadians((double)10) && fabs(theta) < qDegreesToRadians((double)170)){
+    if(fabs(theta) >= qDegreesToRadians((double)10) && fabs(theta) <= qDegreesToRadians((double)170)){
         if(this->x() < 0 || this->x() > (borderOfCharacter.width() - this->boundingRect().width())){
             theta = theta - 2*(M_PI_2 - fabs(theta));
         }

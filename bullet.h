@@ -30,7 +30,7 @@ class bullet: public QObject, public QGraphicsPixmapItem
     Q_OBJECT
 
 public:
-    bullet(const QString &filename = ":/pics/res/error.png", QPointF polar = QPointF(0, 0),
+    bullet(const QString &filename = ":/pics/error", QPointF polar = QPointF(0, 0),
            QPointF picSize = QPointF(15, 15), QGraphicsItem *who = nullptr);
     bullet(const bullet &old);
     ~bullet();

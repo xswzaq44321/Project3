@@ -1,56 +1,45 @@
 <RCC>
     <qresource prefix="/enemy">
-        <file>res/Gaben_Reimu.png</file>
-        <file>res/gabe_newell.png</file>
+        <file alias="gaben_newell">res/enemy/gabe_newell.png</file>
+        <file alias="gaben_reimu">res/enemy/Gaben_Reimu.png</file>
     </qresource>
     <qresource prefix="/bullets">
-        <file>res/steam_logo.png</file>
-        <file>res/50%.png</file>
-        <file>res/66%.png</file>
-        <file>res/75%.png</file>
-        <file>res/90%.png</file>
-        <file>res/USD/1_cent.png</file>
-        <file>res/USD/5_cent.png</file>
-        <file>res/USD/10_cent.png</file>
-        <file>res/USD/25_cent.png</file>
-        <file>res/USD/50_cent.png</file>
-        <file>res/NTD/1_dollor.png</file>
-        <file>res/NTD/5_dollor.png</file>
-        <file>res/NTD/10_dollor.png</file>
-        <file>res/NTD/20_dollor.png</file>
-        <file>res/NTD/50_dollor.png</file>
-        <file>res/card/citi.png</file>
-        <file>res/card/master.png</file>
-        <file>res/card/standard.png</file>
-        <file>res/card/visa.png</file>
+        <file alias="citi_card">res/bullets/card/citi.png</file>
+        <file alias="master_card">res/bullets/card/master.png</file>
+        <file alias="standard_card">res/bullets/card/standard.png</file>
+        <file alias="visa_card">res/bullets/card/visa.png</file>
+        <file alias="50%">res/bullets/gaben/50%.png</file>
+        <file alias="66%">res/bullets/gaben/66%.png</file>
+        <file alias="75%">res/bullets/gaben/75%.png</file>
+        <file alias="90%">res/bullets/gaben/90%.png</file>
+        <file alias="steam_logo">res/bullets/gaben/steam_logo.png</file>
+        <file alias="1_dollor">res/bullets/NTD/1_dollor.png</file>
+        <file alias="5_dollor">res/bullets/NTD/5_dollor.png</file>
+        <file alias="10_dollor">res/bullets/NTD/10_dollor.png</file>
+        <file alias="20_dollor">res/bullets/NTD/20_dollor.png</file>
+        <file alias="50_dollor">res/bullets/NTD/50_dollor.png</file>
     </qresource>
     <qresource prefix="/player">
-        <file>res/Savings.png</file>
-        <file>res/heart.png</file>
+        <file alias="heart">res/player/heart.png</file>
+        <file alias="savings">res/player/Savings.png</file>
     </qresource>
     <qresource prefix="/pics">
-        <file>res/info_board_background.png</file>
-        <file>res/GameOver.png</file>
-        <file>res/error.png</file>
-        <file>res/GameWin.png</file>
+        <file alias="error">res/error.png</file>
+        <file alias="GameOver">res/info board/GameOver.png</file>
+        <file alias="GameWin">res/info board/GameWin.png</file>
+        <file alias="info_board_background">res/info board/info_board_background.png</file>
     </qresource>
     <qresource prefix="/audio">
-        <file>res/Thanks and Have Fun, Gabe Newell.mp3</file>
-        <file>res/GabeN_song.mp3</file>
+        <file alias="GabeN_song">res/audio/GabeN_song.mp3</file>
+        <file alias="Thanks_and_have_fun">res/audio/Thanks and Have Fun, Gabe Newell.mp3</file>
     </qresource>
     <qresource prefix="/font">
-        <file>res/Andy Bold.ttf</file>
-        <file>res/HyliaSerifBeta-Regular.otf</file>
+        <file alias="Andy">res/font/Andy Bold.ttf</file>
+        <file alias="Zelda">res/font/HyliaSerifBeta-Regular.otf</file>
+        <file alias="Arial">res/font/arial.ttf</file>
+        <file alias="Arial Bold">res/font/arialbd.ttf</file>
     </qresource>
     <qresource prefix="/gameList">
-        <file>res/game_list/game1.png</file>
-        <file>res/game_list/game2.png</file>
-        <file>res/game_list/game3.png</file>
-        <file>res/game_list/game4.png</file>
-        <file>res/game_list/game5.png</file>
-        <file>res/game_list/game6.png</file>
-        <file>res/game_list/game7.png</file>
-        <file>res/game_list/game8.png</file>
-        <file>res/game_list/game_list.png</file>
+        <file alias="game_list">res/game_list/game_list.png</file>
     </qresource>
 </RCC>

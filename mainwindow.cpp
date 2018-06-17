@@ -59,7 +59,7 @@ void MainWindow::gameStart(){
     connect(timer, SIGNAL(timeout()), this, SLOT(attackHandler()));
     connect(timer, SIGNAL(timeout()), this, SLOT(infoBoardHandler()));
 
-    infoItem = new QGraphicsPixmapItem(QPixmap(":/pics/res/info_board_background.png").scaled(400, 766, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    infoItem = new QGraphicsPixmapItem(QPixmap(":/pics/info_board_background").scaled(400, 766, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
     infoItem->setPos(622, 0);
     infoItem->setZValue(100);
     scene->addItem(infoItem);
@@ -79,8 +79,8 @@ void MainWindow::gameStart(){
     lifeCanvas->fill(Qt::transparent);
     lifePainter = new QPainter(lifeCanvas);
     for(int i = 0; i < 3; ++i){
-        lifePainter->drawPixmap(0 + 60 * i, 3, QPixmap(":/player/res/Savings.png").scaled(36, 44, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
-        lifePainter->drawPixmap(0 + 60 * i, 63, QPixmap(":/bullets/res/card/master.png").scaled(36, 22.5, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        lifePainter->drawPixmap(0 + 60 * i, 3, QPixmap(":/player/savings").scaled(36, 44, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        lifePainter->drawPixmap(0 + 60 * i, 63, QPixmap(":/bullets/master_card").scaled(36, 22.5, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
     }
     life = new QGraphicsPixmapItem(*lifeCanvas);
     life->setZValue(110);
@@ -93,17 +93,17 @@ void MainWindow::gameStart(){
     backgroundCanvas.fill(Qt::transparent);
     QPainter backgroundPainter(&backgroundCanvas);
     backgroundPainter.setOpacity(0.5);
-    backgroundPainter.drawPixmap(0, 0, QPixmap(":/gameList/res/game_list/game_list.png"));
+    backgroundPainter.drawPixmap(0, 0, QPixmap(":/gameList/game_list"));
     backgroundItem[0] = new QGraphicsPixmapItem(backgroundCanvas.scaled(sizeOfBackground.x(), sizeOfBackground.y()));
     backgroundItem[0]->setPos(0, -sizeOfBackground.y() + borderOfCharacter.height());
     backgroundItem[0]->setZValue(-10);
     scene->addItem(backgroundItem[0]);
     backgroundItem[1] = new QGraphicsPixmapItem(backgroundCanvas.scaled(sizeOfBackground.x(), sizeOfBackground.y()));
-    backgroundItem[1]->setPos(0, -2*sizeOfBackground.y() + borderOfCharacter.height());
+    backgroundItem[1]->setPos(0, -2*sizeOfBackground.y() + borderOfCharacter.height() + 1);
     backgroundItem[1]->setZValue(-10);
     scene->addItem(backgroundItem[1]);
 
-    boss = new gaben_reimu(3000);
+    boss = new gaben_reimu(6000);
     scene->addItem(boss);
     boss->setPosition((borderOfCharacter.width() - boss->boundingRect().width()) / 2, 0 + 40);
     bossHealth = scene->addRect(10, 10, borderOfCharacter.width() - 20, 10, QPen(QColor(0, 0, 0, 0)), QBrush(QColor(200, 0, 0)));
@@ -232,8 +232,9 @@ void MainWindow::collidingDetect(){
                     connect(timer, SIGNAL(timeout()), this, SLOT(respawn()));
                 }
                 shockWaveTime->start();
-                explodeConnection = connect(timer, &QTimer::timeout, [this](void){
-                    playerExplode(QPointF(player->x() + player->boundingRect().width() / 2, player->y() + player->boundingRect().height() / 2));
+                QPointF center(player->x() + player->boundingRect().width() / 2, player->y() + player->boundingRect().height() / 2);
+                explodeConnection = connect(timer, &QTimer::timeout, [this, center](void){
+                    playerExplode(center);
                 });
             }
         }
@@ -282,9 +283,13 @@ void MainWindow::collidingDetect(){
         }
     }
     if(shockWave != nullptr){
+        qreal size = shockWave->boundingRect().width() / 2;
+        QPointF center(shockWave->x() + size, shockWave->y() + size);
+        qreal allowedError = timer->interval() / 1000.0 * sqrt(pow(borderOfCharacter.height(), 2) + pow(borderOfCharacter.width(), 2))*2;
         for(auto it = enemyBulletList.begin(); it != enemyBulletList.end(); ++it){
             if((*it) == nullptr) continue;
-            if((*it)->collidesWithItem(shockWave)){
+            qreal distance = sqrt(pow((*it)->x() + (*it)->boundingRect().width() / 2 - center.x(), 2) + pow((*it)->y() + (*it)->boundingRect().height() / 2 - center.y(), 2));
+            if(distance <= size && distance >= (size - allowedError - 10)){
                 delete (*it);
                 (*it) = nullptr;
             }
@@ -322,8 +327,8 @@ void MainWindow::playerExplode(QPointF center){
         shockWave = new QGraphicsPixmapItem;
         scene->addItem(shockWave);
     }
-    if(shockWaveTime->elapsed() < 1000){
-        qreal size = shockWaveTime->elapsed() / 1000.0 * borderOfCharacter.height() * 2;
+    if(shockWaveTime->elapsed() <= 1100){
+        qreal size = shockWaveTime->elapsed() / 1000.0 * sqrt(pow(borderOfCharacter.height(), 2) + pow(borderOfCharacter.width(), 2)) * 2;
 //        qDebug() << size;
         QPixmap waveCanvas(size, size);
         waveCanvas.fill(Qt::transparent);
@@ -380,12 +385,12 @@ void MainWindow::gameWin(){
     static QGraphicsTextItem *totalScore, *totalSpend, *totalCard;
     respawnTime->start();
 
-    winItem = new QGraphicsPixmapItem(QPixmap(":/pics/res/GameWin.png").scaled(borderOfCharacter.width(), borderOfCharacter.height()));
+    winItem = new QGraphicsPixmapItem(QPixmap(":/pics/GameWin").scaled(borderOfCharacter.width(), borderOfCharacter.height()));
     winItem->setPos(0, 0);
     winItem->setZValue(110);
     scene->addItem(winItem);
     QFont clearingFont("Arial", 36);
-    totalScore = scene->addText(QString("你得到了:") + QString::number(score) + QString("分"), clearingFont);
+    totalScore = scene->addText(QString("你得到了") + QString::number(score) + QString("分"), clearingFont);
     totalScore->setDefaultTextColor(QColor(255, 255, 255));
     totalScore->setPos(100, 250);
     totalScore->setZValue(110);
@@ -405,7 +410,7 @@ void MainWindow::gameOver(){
     QPainter painter(&overPic);
     painter.fillRect(borderOfCharacter, QColor(0, 0, 0, 100));
     painter.setOpacity(0.7);
-    painter.drawPixmap(0, 0, borderOfCharacter.width(), borderOfCharacter.height(), QPixmap(":/pics/res/GameOver.png"));
+    painter.drawPixmap(0, 0, borderOfCharacter.width(), borderOfCharacter.height(), QPixmap(":/pics/GameOver"));
     overItem = new QGraphicsPixmapItem(overPic);
     overItem->setZValue(110);
     overItem->setPos(0, 0);
@@ -449,10 +454,10 @@ void MainWindow::infoBoardHandler(){
         sprintf(temp, "Cost:%08d", (int)spend);
         costText->setPlainText(QString::fromLocal8Bit(temp));
 
-        static int backIndex = 0;
-        if(backgroundItem[backIndex]->y() >= borderOfCharacter.height()){
-            backgroundItem[backIndex]->setPos(0, -2*sizeOfBackground.y() + borderOfCharacter.height());
-            backIndex = 1;
+        if(backgroundItem[0]->y() >= borderOfCharacter.height()){
+            backgroundItem[0]->setPos(0, backgroundItem[1]->y() - sizeOfBackground.y() + 1);
+        }else if(backgroundItem[1]->y() >= borderOfCharacter.height()){
+            backgroundItem[1]->setPos(0, backgroundItem[0]->y() - sizeOfBackground.y() + 1);
         }
         backgroundItem[0]->setPos(0, backgroundItem[0]->y() + timer->interval() / 10.0);
         backgroundItem[1]->setPos(0, backgroundItem[1]->y() + timer->interval() / 10.0);
@@ -460,7 +465,7 @@ void MainWindow::infoBoardHandler(){
     if(player != nullptr && (player->hp != playerLife || dynamic_cast<wallet*>(player)->spells != playerSpell)){
         if(player->hp > playerLife){
             for(int i = playerLife; i < player->hp; ++i){
-                lifePainter->drawPixmap(i * 60, 3, QPixmap(":/player/res/Savings.png").scaled(36, 44, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+                lifePainter->drawPixmap(i * 60, 3, QPixmap(":/player/savings").scaled(36, 44, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
             }
         }else{
 //            qDebug() << "erase";
@@ -473,7 +478,7 @@ void MainWindow::infoBoardHandler(){
         int spells = dynamic_cast<wallet*>(player)->spells;
         if(spells > playerSpell){
             for(int i = playerSpell; i < spells; ++i){
-                lifePainter->drawPixmap(i * 60, 63, QPixmap(":/bullets/res/card/master.png").scaled(36, 22.5, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+                lifePainter->drawPixmap(i * 60, 63, QPixmap(":/bullets/master_card").scaled(36, 22.5, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
             }
         }else{
             lifePainter->setCompositionMode(QPainter::CompositionMode_Source);
